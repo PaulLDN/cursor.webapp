@@ -7,7 +7,6 @@ import LessonManager from '@/components/LessonManager';
 import { Plus, Edit, Trash2, Users, BookOpen, Award, LogOut, Save, X, Search, Play } from 'lucide-react';
 import { apiService } from '@/services/api';
 import { Lesson } from '@/types';
-import { lessonStorage } from '@/utils/lessonStorage';
 
 interface Course {
   id: string;

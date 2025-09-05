@@ -5,7 +5,7 @@ const dotenv = require('dotenv');
 const errorHandler = require('./middleware/errorHandler');
 
 // Load env vars
-dotenv.config({ path: './config.env' });
+dotenv.config({ path: '../config.env' });
 
 // Connect to database
 mongoose.connect(process.env.MONGODB_URI, {
