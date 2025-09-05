@@ -1,26 +1,52 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { demoCourses } from '@/data/demoData';
+import { apiService } from '@/services/api';
+import { useAuth } from '@/hooks/useAuthContext';
 import Button from '@/components/Button';
-import { Send, MessageCircle, ArrowRight } from 'lucide-react';
+import { Send, MessageCircle, ArrowRight, Loader2, Bot, User } from 'lucide-react';
+
+interface Message {
+  id: string;
+  type: 'user' | 'assistant';
+  content: string;
+  timestamp: string;
+}
 
 const ChatbotCoach = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const course = demoCourses.find(c => c.id === courseId);
-  const [messages, setMessages] = useState<Array<{
-    id: string;
-    type: 'user' | 'assistant';
-    content: string;
-    timestamp: string;
-  }>>([
-    {
-      id: '1',
-      type: 'assistant' as const,
-      content: `Hello! I'm your pre-quiz coach for "${course?.title}". I'm here to help you prepare for the quiz by answering any questions you might have about the course content. What would you like to know?`,
-      timestamp: new Date().toISOString()
-    }
-  ]);
+  const { user } = useAuth();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [course, setCourse] = useState<any>(null);
+
+  // Load course data
+  useEffect(() => {
+    const loadCourse = async () => {
+      try {
+        const response = await apiService.getCourses();
+        if (response.success && response.data) {
+          const foundCourse = response.data.find((c: any) => c._id === courseId || c.id === courseId);
+          if (foundCourse) {
+            setCourse(foundCourse);
+            // Initialize with AI greeting
+            setMessages([{
+              id: '1',
+              type: 'assistant',
+              content: `Hello! I'm your AI-powered pre-quiz coach for "${foundCourse.title}". I'm here to help you prepare for the quiz by answering any questions you might have about the course content. What would you like to know?`,
+              timestamp: new Date().toISOString()
+            }]);
+          }
+        }
+      } catch (error) {
+        console.error('Error loading course:', error);
+      }
+    };
+
+    if (courseId) {
+      loadCourse();
+    }
+  }, [courseId]);
 
   if (!course) {
     return (
@@ -35,35 +61,72 @@ const ChatbotCoach = () => {
     );
   }
 
-  const suggestedQuestions = course.faq.slice(0, 4).map(faq => faq.question);
+  const suggestedQuestions = [
+    "What are the key concepts I should focus on?",
+    "Can you explain the main topics in simple terms?",
+    "What should I review before taking the quiz?",
+    "Are there any important details I might miss?"
+  ];
 
-  const handleSendMessage = () => {
-    if (!inputMessage.trim()) return;
+  const handleSendMessage = async () => {
+    if (!inputMessage.trim() || isLoading) return;
 
-    const userMessage = {
+    const userMessage: Message = {
       id: Date.now().toString(),
-      type: 'user' as const,
+      type: 'user',
       content: inputMessage,
       timestamp: new Date().toISOString()
     };
 
-    // Find relevant FAQ answer
-    const relevantFAQ = course.faq.find(faq => 
-      faq.question.toLowerCase().includes(inputMessage.toLowerCase()) ||
-      inputMessage.toLowerCase().includes(faq.question.toLowerCase().split(' ')[0])
-    );
-
-    const assistantResponse = {
-      id: (Date.now() + 1).toString(),
-      type: 'assistant' as const,
-      content: relevantFAQ 
-        ? relevantFAQ.answer 
-        : "I understand your question. Based on the course content, I'd recommend reviewing the relevant slides. If you have specific questions about the material, feel free to ask!",
-      timestamp: new Date().toISOString()
-    };
-
-    setMessages(prev => [...prev, userMessage, assistantResponse]);
+    setMessages(prev => [...prev, userMessage]);
     setInputMessage('');
+    setIsLoading(true);
+
+    try {
+      const response = await apiService.chatWithAI(
+        inputMessage,
+        courseId,
+        {
+          courseTitle: course.title,
+          currentTopic: 'Pre-quiz preparation',
+          userRole: user?.role
+        }
+      );
+
+      if (response.success) {
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          type: 'assistant',
+          content: response.data.message,
+          timestamp: response.data.timestamp
+        };
+        setMessages(prev => [...prev, assistantMessage]);
+      } else {
+        throw new Error(response.message || 'Failed to get AI response');
+      }
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        type: 'assistant',
+        content: "I'm sorry, I'm having trouble connecting to the AI service right now. Please try again in a moment, or contact support if the issue persists.",
+        timestamp: new Date().toISOString()
+      };
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleSuggestedQuestion = (question: string) => {
+    setInputMessage(question);
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
   };
 
   return (
@@ -73,13 +136,13 @@ const ChatbotCoach = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <div className="flex items-center">
-              <Link to={`/courses/${course.id}`} className="text-corporate-primary hover:text-corporate-secondary">
+              <Link to={`/courses/${courseId}`} className="text-corporate-primary hover:text-corporate-secondary">
                 ← Back to Course
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <MessageCircle className="h-5 w-5 text-corporate-primary" />
-              <span className="text-sm text-gray-600">Pre-Quiz Coach</span>
+              <Bot className="h-5 w-5 text-corporate-primary" />
+              <span className="text-sm text-gray-600">AI Pre-Quiz Coach</span>
             </div>
           </div>
         </div>
@@ -89,7 +152,7 @@ const ChatbotCoach = () => {
         <div className="bg-white rounded-lg shadow-lg h-[600px] flex flex-col">
           {/* Chat Header */}
           <div className="p-6 border-b border-gray-200">
-            <h1 className="text-xl font-semibold text-gray-900">Pre-Quiz Coach</h1>
+            <h1 className="text-xl font-semibold text-gray-900">AI Pre-Quiz Coach</h1>
             <p className="text-gray-600">Ask me anything about the course content before taking the quiz</p>
           </div>
 
@@ -100,17 +163,46 @@ const ChatbotCoach = () => {
                 key={message.id}
                 className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
               >
-                <div
-                  className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                    message.type === 'user'
-                      ? 'bg-gradient-corporate text-white'
-                      : 'bg-gray-100 text-gray-900'
-                  }`}
-                >
-                  <p className="text-sm">{message.content}</p>
+                <div className={`flex items-start space-x-2 max-w-xs lg:max-w-md ${message.type === 'user' ? 'flex-row-reverse space-x-reverse' : ''}`}>
+                  <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+                    message.type === 'user' 
+                      ? 'bg-gradient-corporate text-white' 
+                      : 'bg-gray-100 text-gray-600'
+                  }`}>
+                    {message.type === 'user' ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+                  </div>
+                  <div
+                    className={`px-4 py-2 rounded-lg ${
+                      message.type === 'user'
+                        ? 'bg-gradient-corporate text-white'
+                        : 'bg-gray-100 text-gray-900'
+                    }`}
+                  >
+                    <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                    <p className="text-xs opacity-70 mt-1">
+                      {new Date(message.timestamp).toLocaleTimeString()}
+                    </p>
+                  </div>
                 </div>
               </div>
             ))}
+            
+            {/* Loading indicator */}
+            {isLoading && (
+              <div className="flex justify-start">
+                <div className="flex items-start space-x-2 max-w-xs lg:max-w-md">
+                  <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gray-100 text-gray-600 flex items-center justify-center">
+                    <Bot className="w-4 h-4" />
+                  </div>
+                  <div className="px-4 py-2 rounded-lg bg-gray-100 text-gray-900">
+                    <div className="flex items-center space-x-2">
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span className="text-sm">AI is thinking...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Suggested Questions */}
@@ -120,44 +212,38 @@ const ChatbotCoach = () => {
               {suggestedQuestions.map((question, index) => (
                 <button
                   key={index}
-                  onClick={() => setInputMessage(question)}
-                  className="px-3 py-1 bg-blue-50 text-blue-700 text-sm rounded-full hover:bg-blue-100 transition-colors"
+                  onClick={() => handleSuggestedQuestion(question)}
+                  className="px-3 py-1 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full transition-colors"
                 >
                   {question}
                 </button>
               ))}
             </div>
-          </div>
 
-          {/* Input */}
-          <div className="p-6 border-t border-gray-200">
+            {/* Input */}
             <div className="flex space-x-2">
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                placeholder="Ask a question about the course..."
-                className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-corporate-primary focus:border-transparent"
+                onKeyPress={handleKeyPress}
+                placeholder="Ask me anything about the course..."
+                className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-corporate-primary focus:border-transparent"
+                disabled={isLoading}
               />
-              <Button onClick={handleSendMessage} disabled={!inputMessage.trim()}>
-                <Send className="h-4 w-4" />
+              <Button
+                onClick={handleSendMessage}
+                disabled={!inputMessage.trim() || isLoading}
+                className="px-4 py-2"
+              >
+                {isLoading ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <Send className="w-4 h-4" />
+                )}
               </Button>
             </div>
           </div>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="mt-8 flex justify-center space-x-4">
-          <Link to={`/courses/${course.id}`}>
-            <Button variant="outline">Back to Course</Button>
-          </Link>
-          <Link to={`/courses/${course.id}/quiz`}>
-            <Button>
-              Proceed to Quiz
-              <ArrowRight className="h-4 w-4 ml-2" />
-            </Button>
-          </Link>
         </div>
       </div>
     </div>

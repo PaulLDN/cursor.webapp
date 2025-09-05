@@ -258,6 +258,25 @@ class ApiService {
       data: any[];
     }>('/progress/certificates');
   }
+
+  // Chatbot API methods
+  async chatWithAI(message: string, courseId?: string, context?: any) {
+    return this.request<{
+      success: boolean;
+      data: {
+        message: string;
+        timestamp: string;
+        courseId: string | null;
+      };
+    }>('/chatbot/chat', {
+      method: 'POST',
+      body: JSON.stringify({
+        message,
+        courseId,
+        context
+      }),
+    });
+  }
 }
 
 export const apiService = new ApiService(API_BASE_URL);
