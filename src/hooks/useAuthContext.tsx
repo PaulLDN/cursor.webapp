@@ -1,7 +1,6 @@
 import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 import { User, AuthState } from '@/types';
-import { storage } from '@/utils/storage';
-import { demoUsers } from '@/data/demoData';
+import { apiService } from '@/services/api';
 
 interface AuthContextType extends AuthState {
   login: (email: string, password: string) => Promise<boolean>;
@@ -32,36 +31,100 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   useEffect(() => {
     // Check for existing user on app load
-    const savedUser = storage.getUser();
-    if (savedUser) {
-      setAuthState({
-        user: savedUser,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-    } else {
-      setAuthState({
-        user: null,
-        isAuthenticated: false,
-        isLoading: false,
-      });
-    }
+    const checkAuth = async () => {
+      try {
+        const response = await apiService.getMe();
+        if (response.success) {
+          setAuthState({
+            user: response.data,
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } else {
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
+      } catch (error) {
+        // Fallback to localStorage if API is not available
+        const savedUser = localStorage.getItem('user');
+        if (savedUser) {
+          setAuthState({
+            user: JSON.parse(savedUser),
+            isAuthenticated: true,
+            isLoading: false,
+          });
+        } else {
+          setAuthState({
+            user: null,
+            isAuthenticated: false,
+            isLoading: false,
+          });
+        }
+      }
+    };
+
+    checkAuth();
   }, []);
 
   const login = async (email: string, password: string): Promise<boolean> => {
     setAuthState(prev => ({ ...prev, isLoading: true }));
 
     try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Check demo users (in real app, this would be an API call)
-      const user = demoUsers.find(u => u.email === email);
+      const response = await apiService.login({ email, password });
       
-      if (user && password === 'password') {
-        storage.setUser(user);
+      if (response.success) {
         setAuthState({
-          user,
+          user: response.data,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        return true;
+      }
+
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      return false;
+    } catch (error) {
+      // Fallback to demo users if API is not available
+      const demoUsers = [
+        { id: '1', email: 'student@example.com', password: 'password', name: 'John Student', role: 'student' },
+        { id: '2', email: 'admin@example.com', password: 'password', name: 'Admin User', role: 'admin' }
+      ];
+      
+      const user = demoUsers.find(u => u.email === email && u.password === password);
+      
+      if (user) {
+        const userData = { id: user.id, email: user.email, name: user.name, role: user.role };
+        localStorage.setItem('user', JSON.stringify(userData));
+        setAuthState({
+          user: userData,
+          isAuthenticated: true,
+          isLoading: false,
+        });
+        return true;
+      }
+
+      setAuthState(prev => ({ ...prev, isLoading: false }));
+      return false;
+    }
+  };
+
+  const register = async (
+    email: string, 
+    password: string, 
+    name: string, 
+    role: 'student' | 'admin'
+  ): Promise<boolean> => {
+    setAuthState(prev => ({ ...prev, isLoading: true }));
+
+    try {
+      const response = await apiService.register({ email, password, name, role });
+      
+      if (response.success) {
+        setAuthState({
+          user: response.data,
           isAuthenticated: true,
           isLoading: false,
         });
@@ -76,53 +139,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const register = async (
-    email: string, 
-    _password: string, 
-    name: string, 
-    role: 'student' | 'admin'
-  ): Promise<boolean> => {
-    setAuthState(prev => ({ ...prev, isLoading: true }));
-
-    try {
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-
-      // Check if user already exists
-      const existingUser = demoUsers.find(u => u.email === email);
-      if (existingUser) {
-        setAuthState(prev => ({ ...prev, isLoading: false }));
-        return false;
-      }
-
-      // Create new user (in real app, this would be an API call)
-      const newUser: User = {
-        id: Date.now().toString(),
-        email,
-        name,
-        role,
-        createdAt: new Date().toISOString(),
-      };
-
-      // Add to demo users (in real app, this would be saved to backend)
-      demoUsers.push(newUser);
-      
-      storage.setUser(newUser);
-      setAuthState({
-        user: newUser,
-        isAuthenticated: true,
-        isLoading: false,
-      });
-      
-      return true;
-    } catch (error) {
-      setAuthState(prev => ({ ...prev, isLoading: false }));
-      return false;
-    }
-  };
-
   const logout = () => {
-    storage.clearAll();
+    apiService.clearToken();
+    localStorage.removeItem('user');
     setAuthState({
       user: null,
       isAuthenticated: false,
