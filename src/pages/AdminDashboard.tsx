@@ -38,21 +38,36 @@ const AdminDashboard = () => {
     try {
       setLoading(true);
       const response = await apiService.getCourses();
-      if (response.success) {
-        // Load lessons from localStorage for each course
-        const coursesWithLessons = response.data.map(course => ({
-          ...course,
-          lessons: lessonStorage.getLessons(course.id)
-        }));
+      if (response.success && response.data) {
+        // Load lessons from API for each course
+        const coursesWithLessons = await Promise.all(
+          response.data.map(async (course) => {
+            try {
+              const lessonsResponse = await apiService.getCourseLessons(course.id);
+              return {
+                ...course,
+                lessons: lessonsResponse.success ? lessonsResponse.data : []
+              };
+            } catch (error) {
+              console.error(`Error loading lessons for course ${course.id}:`, error);
+              return {
+                ...course,
+                lessons: []
+              };
+            }
+          })
+        );
         setCourses(coursesWithLessons);
+        console.log('Courses loaded from database:', coursesWithLessons);
+      } else {
+        console.log('No courses found in database, using demo data');
+        // Fallback to demo data
+        setCourses(demoCourses);
       }
     } catch (error) {
-      // Fallback to demo data with lessons from localStorage
-      const coursesWithLessons = demoCourses.map(course => ({
-        ...course,
-        lessons: lessonStorage.getLessons(course.id)
-      }));
-      setCourses(coursesWithLessons);
+      console.error('Error loading courses from API:', error);
+      // Fallback to demo data
+      setCourses(demoCourses);
     } finally {
       setLoading(false);
     }
@@ -72,15 +87,37 @@ const AdminDashboard = () => {
 
     try {
       console.log('Saving course with lessons:', editingCourse);
-      // In a real app, this would call the API
+      
+      // Save to MongoDB via API
+      const response = await apiService.updateCourse(editingCourse.id, editingCourse);
+      if (response.success) {
+        console.log('Course saved to database successfully');
+        // Update local state
+        setCourses(prev => 
+          prev.map(course => 
+            course.id === editingCourse.id ? { ...editingCourse } : course
+          )
+        );
+        setEditingCourse(null);
+      } else {
+        console.error('Failed to save course to database');
+        // Still update local state as fallback
+        setCourses(prev => 
+          prev.map(course => 
+            course.id === editingCourse.id ? { ...editingCourse } : course
+          )
+        );
+        setEditingCourse(null);
+      }
+    } catch (error) {
+      console.error('Error saving course:', error);
+      // Still update local state as fallback
       setCourses(prev => 
         prev.map(course => 
           course.id === editingCourse.id ? { ...editingCourse } : course
         )
       );
       setEditingCourse(null);
-    } catch (error) {
-      console.error('Error saving course:', error);
     }
   };
 
@@ -95,28 +132,57 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleLessonsChange = (courseId: string, lessons: Lesson[]) => {
+  const handleLessonsChange = async (courseId: string, lessons: Lesson[]) => {
     console.log('Updating lessons for course:', courseId, lessons);
     
-    // Save to localStorage
-    lessonStorage.saveLessons(courseId, lessons);
-    
-    setCourses(prev => 
-      prev.map(course => 
-        course.id === courseId ? { ...course, lessons } : course
-      )
-    );
-    
-    // Also update the editing course if it's the same course
-    if (editingCourse && editingCourse.id === courseId) {
-      setEditingCourse(prev => prev ? { ...prev, lessons } : null);
+    try {
+      // Save to MongoDB via API
+      const response = await apiService.updateCourseLessons(courseId, lessons);
+      if (response.success) {
+        console.log('Lessons saved to database successfully');
+        
+        // Update local state
+        setCourses(prev => 
+          prev.map(course => 
+            course.id === courseId ? { ...course, lessons } : course
+          )
+        );
+        
+        // Also update the editing course if it's the same course
+        if (editingCourse && editingCourse.id === courseId) {
+          setEditingCourse(prev => prev ? { ...prev, lessons } : null);
+        }
+      } else {
+        console.error('Failed to save lessons to database');
+        // Still update local state as fallback
+        setCourses(prev => 
+          prev.map(course => 
+            course.id === courseId ? { ...course, lessons } : course
+          )
+        );
+        
+        if (editingCourse && editingCourse.id === courseId) {
+          setEditingCourse(prev => prev ? { ...prev, lessons } : null);
+        }
+      }
+    } catch (error) {
+      console.error('Error saving lessons:', error);
+      // Still update local state as fallback
+      setCourses(prev => 
+        prev.map(course => 
+          course.id === courseId ? { ...course, lessons } : course
+        )
+      );
+      
+      if (editingCourse && editingCourse.id === courseId) {
+        setEditingCourse(prev => prev ? { ...prev, lessons } : null);
+      }
     }
   };
 
   const getCourseLessons = (courseId: string): Lesson[] => {
     const course = courses.find(c => c.id === courseId);
-    const storedLessons = lessonStorage.getLessons(courseId);
-    return course?.lessons || storedLessons || [];
+    return course?.lessons || [];
   };
 
   const filteredCourses = courses.filter(course =>

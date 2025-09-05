@@ -6,7 +6,9 @@ const {
   createCourse,
   updateCourse,
   deleteCourse,
-  enrollInCourse
+  enrollInCourse,
+  updateCourseLessons,
+  getCourseLessons
 } = require('../controllers/courseController');
 const { protect, authorize } = require('../middleware/auth');
 
@@ -52,5 +54,15 @@ router.delete('/:id', protect, authorize('admin'), deleteCourse);
 
 // @route   POST /api/courses/:id/enroll
 router.post('/:id/enroll', protect, enrollInCourse);
+
+// @route   PUT /api/courses/:id/lessons
+router.put('/:id/lessons', protect, authorize('admin'), [
+  body('lessons')
+    .isArray()
+    .withMessage('Lessons must be an array')
+], updateCourseLessons);
+
+// @route   GET /api/courses/:id/lessons
+router.get('/:id/lessons', getCourseLessons);
 
 module.exports = router;

@@ -69,6 +69,50 @@ const faqSchema = new mongoose.Schema({
   }]
 });
 
+const lessonSchema = new mongoose.Schema({
+  title: {
+    type: String,
+    required: [true, 'Lesson title is required'],
+    trim: true
+  },
+  description: {
+    type: String,
+    required: [true, 'Lesson description is required'],
+    trim: true
+  },
+  type: {
+    type: String,
+    enum: ['slide', 'video', 'quiz', 'text'],
+    required: [true, 'Lesson type is required']
+  },
+  content: {
+    type: String,
+    required: [true, 'Lesson content is required']
+  },
+  videoUrl: {
+    type: String,
+    default: ''
+  },
+  imageUrl: {
+    type: String,
+    default: ''
+  },
+  duration: {
+    type: Number,
+    required: [true, 'Lesson duration is required'],
+    min: [1, 'Duration must be at least 1 minute']
+  },
+  order: {
+    type: Number,
+    required: [true, 'Lesson order is required']
+  },
+  isPublished: {
+    type: Boolean,
+    default: true
+  },
+  slides: [slideSchema]
+});
+
 const courseSchema = new mongoose.Schema({
   title: {
     type: String,
@@ -106,6 +150,7 @@ const courseSchema = new mongoose.Schema({
     default: ''
   },
   syllabus: [slideSchema],
+  lessons: [lessonSchema],
   quizQuestions: [quizQuestionSchema],
   faq: [faqSchema],
   isPublished: {

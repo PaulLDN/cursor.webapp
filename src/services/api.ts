@@ -158,6 +158,52 @@ class ApiService {
     });
   }
 
+  async createCourse(courseData: any) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>('/courses', {
+      method: 'POST',
+      body: JSON.stringify(courseData),
+    });
+  }
+
+  async updateCourse(courseId: string, courseData: any) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>(`/courses/${courseId}`, {
+      method: 'PUT',
+      body: JSON.stringify(courseData),
+    });
+  }
+
+  async deleteCourse(courseId: string) {
+    return this.request<{
+      success: boolean;
+      message: string;
+    }>(`/courses/${courseId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  async updateCourseLessons(courseId: string, lessons: any[]) {
+    return this.request<{
+      success: boolean;
+      data: any;
+    }>(`/courses/${courseId}/lessons`, {
+      method: 'PUT',
+      body: JSON.stringify({ lessons }),
+    });
+  }
+
+  async getCourseLessons(courseId: string) {
+    return this.request<{
+      success: boolean;
+      data: any[];
+    }>(`/courses/${courseId}/lessons`);
+  }
+
   // Progress endpoints
   async getUserProgress() {
     return this.request<{

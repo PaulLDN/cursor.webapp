@@ -234,11 +234,72 @@ const enrollInCourse = async (req, res) => {
   }
 };
 
+// @desc    Update course lessons
+// @route   PUT /api/courses/:id/lessons
+// @access  Private/Admin
+const updateCourseLessons = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id);
+    
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    // Update lessons
+    course.lessons = req.body.lessons;
+    await course.save();
+
+    res.json({
+      success: true,
+      message: 'Course lessons updated successfully',
+      data: course
+    });
+  } catch (error) {
+    console.error('Update course lessons error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
+// @desc    Get course lessons
+// @route   GET /api/courses/:id/lessons
+// @access  Public
+const getCourseLessons = async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id).select('lessons');
+    
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: 'Course not found'
+      });
+    }
+
+    res.json({
+      success: true,
+      data: course.lessons || []
+    });
+  } catch (error) {
+    console.error('Get course lessons error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error'
+    });
+  }
+};
+
 module.exports = {
   getCourses,
   getCourse,
   createCourse,
   updateCourse,
   deleteCourse,
-  enrollInCourse
+  enrollInCourse,
+  updateCourseLessons,
+  getCourseLessons
 };
