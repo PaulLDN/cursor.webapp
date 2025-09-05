@@ -251,6 +251,16 @@ const ChatbotCoach = () => {
                 )}
               </Button>
             </div>
+
+            {/* Continue to Quiz Button */}
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <Link to={`/courses/${courseId}/quiz`}>
+                <Button className="w-full bg-gradient-corporate hover:opacity-90 text-white">
+                  <ArrowRight className="w-4 h-4 mr-2" />
+                  Continue to Quiz
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
