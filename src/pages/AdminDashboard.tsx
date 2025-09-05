@@ -1,13 +1,87 @@
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuthContext';
 import { demoCourses } from '@/data/demoData';
 import Button from '@/components/Button';
-import { Plus, Edit, Trash2, Users, BookOpen, Award, LogOut } from 'lucide-react';
+import { Input } from '@/components/Input';
+import { Plus, Edit, Trash2, Users, BookOpen, Award, LogOut, Save, X, Search } from 'lucide-react';
+import { apiService } from '@/services/api';
+
+interface Course {
+  id: string;
+  title: string;
+  description: string;
+  level: string;
+  duration: number;
+  isPublished?: boolean;
+  syllabus: any[];
+}
 
 const AdminDashboard = () => {
   const { user, logout } = useAuth();
+  const [courses, setCourses] = useState<Course[]>(demoCourses);
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  // Load courses from API
+  useEffect(() => {
+    loadCourses();
+  }, []);
+
+  const loadCourses = async () => {
+    try {
+      setLoading(true);
+      const response = await apiService.getCourses();
+      if (response.success) {
+        setCourses(response.data);
+      }
+    } catch (error) {
+      // Fallback to demo data
+      setCourses(demoCourses);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditCourse = (course: Course) => {
+    setEditingCourse({ ...course });
+  };
+
+  const handleSaveCourse = async () => {
+    if (!editingCourse) return;
+
+    try {
+      // In a real app, this would call the API
+      setCourses(prev => 
+        prev.map(course => 
+          course.id === editingCourse.id ? editingCourse : course
+        )
+      );
+      setEditingCourse(null);
+    } catch (error) {
+      console.error('Error saving course:', error);
+    }
+  };
+
+  const handleDeleteCourse = async (courseId: string) => {
+    if (!confirm('Are you sure you want to delete this course?')) return;
+
+    try {
+      // In a real app, this would call the API
+      setCourses(prev => prev.filter(course => course.id !== courseId));
+    } catch (error) {
+      console.error('Error deleting course:', error);
+    }
+  };
+
+  const filteredCourses = courses.filter(course =>
+    course.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    course.description.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   const stats = [
-    { label: 'Total Courses', value: demoCourses.length.toString(), icon: BookOpen, color: 'text-blue-600' },
+    { label: 'Total Courses', value: courses.length.toString(), icon: BookOpen, color: 'text-blue-600' },
     { label: 'Total Students', value: '1,234', icon: Users, color: 'text-green-600' },
     { label: 'Certificates Issued', value: '856', icon: Award, color: 'text-purple-600' },
     { label: 'Completion Rate', value: '78%', icon: BookOpen, color: 'text-orange-600' },
@@ -119,72 +193,150 @@ const AdminDashboard = () => {
 
         {/* Course Management */}
         <div className="bg-white rounded-lg shadow">
-          <div className="p-6 border-b border-gray-200 flex justify-between items-center">
-            <h3 className="text-lg font-semibold text-gray-900">Course Management</h3>
-            <Button size="sm">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Course
-            </Button>
+          <div className="p-6 border-b border-gray-200">
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold text-gray-900">Course Management</h3>
+              <div className="flex items-center space-x-4">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                  <Input
+                    type="text"
+                    placeholder="Search courses..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 w-64"
+                  />
+                </div>
+                <Button size="sm" onClick={() => setShowCreateForm(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Course
+                </Button>
+              </div>
+            </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Course
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Level
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Students
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Completion
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {demoCourses.map((course) => (
-                  <tr key={course.id}>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div>
-                        <div className="text-sm font-medium text-gray-900">{course.title}</div>
-                        <div className="text-sm text-gray-500">{course.syllabus.length} lessons</div>
+          
+          <div className="p-6">
+            {loading ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                <p className="mt-2 text-gray-600">Loading courses...</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredCourses.map((course) => (
+                  <div key={course.id} className="border border-gray-200 rounded-lg p-4">
+                    {editingCourse?.id === course.id ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Course Title
+                            </label>
+                            <Input
+                              value={editingCourse.title}
+                              onChange={(e) => setEditingCourse({...editingCourse, title: e.target.value})}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                              Level
+                            </label>
+                            <select
+                              value={editingCourse.level}
+                              onChange={(e) => setEditingCourse({...editingCourse, level: e.target.value})}
+                              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                              <option value="beginner">Beginner</option>
+                              <option value="intermediate">Intermediate</option>
+                              <option value="advanced">Advanced</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            value={editingCourse.description}
+                            onChange={(e) => setEditingCourse({...editingCourse, description: e.target.value})}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            rows={3}
+                          />
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          <div className="flex items-center">
+                            <input
+                              type="checkbox"
+                              id="published"
+                              checked={editingCourse.isPublished || false}
+                              onChange={(e) => setEditingCourse({...editingCourse, isPublished: e.target.checked})}
+                              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                            />
+                            <label htmlFor="published" className="ml-2 text-sm text-gray-700">
+                              Published
+                            </label>
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button onClick={handleSaveCourse} size="sm">
+                              <Save className="h-4 w-4 mr-1" />
+                              Save
+                            </Button>
+                            <Button 
+                              variant="outline" 
+                              onClick={() => setEditingCourse(null)} 
+                              size="sm"
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Cancel
+                            </Button>
+                          </div>
+                        </div>
                       </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 py-1 text-xs font-medium rounded-full ${
-                        course.level === 'beginner' ? 'bg-green-100 text-green-800' :
-                        course.level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
-                        'bg-red-100 text-red-800'
-                      }`}>
-                        {course.level}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      156
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      78%
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
-                      <Button size="sm" variant="outline">
-                        <Edit className="h-3 w-3 mr-1" />
-                        Edit
-                      </Button>
-                      <Button size="sm" variant="outline">
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete
-                      </Button>
-                    </td>
-                  </tr>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-gray-900">{course.title}</h3>
+                          <p className="text-sm text-gray-600 mt-1">{course.description}</p>
+                          <div className="flex items-center space-x-4 mt-2">
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              course.level === 'beginner' ? 'bg-green-100 text-green-800' :
+                              course.level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
+                            </span>
+                            <span className="text-sm text-gray-500">{course.duration} minutes</span>
+                            <span className="text-sm text-gray-500">{course.syllabus.length} lessons</span>
+                            <span className={`px-2 py-1 text-xs font-medium rounded-full ${
+                              course.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
+                            }`}>
+                              {course.isPublished ? 'Published' : 'Draft'}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditCourse(course)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleDeleteCourse(course.id)}
+                            className="text-red-600 hover:text-red-700"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 ))}
-              </tbody>
-            </table>
+              </div>
+            )}
           </div>
         </div>
       </div>
