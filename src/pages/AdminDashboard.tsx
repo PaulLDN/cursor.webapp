@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/hooks/useAuthContext';
 import { demoCourses } from '@/data/demoData';
 import Button from '@/components/Button';
-import { Input } from '@/components/Input';
+import Input from '@/components/Input';
 import { Plus, Edit, Trash2, Users, BookOpen, Award, LogOut, Save, X, Search } from 'lucide-react';
 import { apiService } from '@/services/api';
 

@@ -18,6 +18,9 @@ export const useAuth = () => {
   return context;
 };
 
+// Also export as useAuthContext for consistency
+export const useAuthContext = useAuth;
+
 interface AuthProviderProps {
   children: ReactNode;
 }
