@@ -270,19 +270,37 @@ const AdminDashboard = () => {
               <h3 className="text-lg font-semibold text-gray-900">Quick Actions</h3>
             </div>
             <div className="p-6 space-y-4">
-              <Button className="w-full justify-start">
+              <Button 
+                className="w-full justify-start"
+                onClick={() => setShowCreateForm(true)}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Create New Course
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => {
+                  const courseManagement = document.getElementById('course-management');
+                  courseManagement?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
                 <Edit className="h-4 w-4 mr-2" />
                 Manage Existing Courses
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => alert('Student Progress feature coming soon!')}
+              >
                 <Users className="h-4 w-4 mr-2" />
                 View Student Progress
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={() => alert('Certificate Management feature coming soon!')}
+              >
                 <Award className="h-4 w-4 mr-2" />
                 Manage Certificates
               </Button>
@@ -320,7 +338,7 @@ const AdminDashboard = () => {
         </div>
 
         {/* Course Management */}
-        <div className="bg-white rounded-lg shadow">
+        <div id="course-management" className="bg-white rounded-lg shadow">
           <div className="p-6 border-b border-gray-200">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-semibold text-gray-900">Course Management</h3>
