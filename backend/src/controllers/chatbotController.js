@@ -159,9 +159,9 @@ When user input is improperly handled in database queries, allowing attackers to
 • Complete system compromise
 
 🛠️ **Common Attack Vectors:**
-• Login forms: `' OR '1'='1`
-• Search boxes: `'; DROP TABLE users; --`
-• URL parameters: `?id=1' UNION SELECT * FROM users --`
+• Login forms: ' OR '1'='1
+• Search boxes: '; DROP TABLE users; --
+• URL parameters: ?id=1' UNION SELECT * FROM users --
 
 ✅ **Prevention:**
 • Use parameterized queries/prepared statements
