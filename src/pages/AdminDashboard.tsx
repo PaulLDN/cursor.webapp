@@ -49,17 +49,23 @@ const AdminDashboard = () => {
   };
 
   const handleEditCourse = (course: Course) => {
-    setEditingCourse({ ...course });
+    // Ensure lessons array exists
+    const courseWithLessons = {
+      ...course,
+      lessons: course.lessons || []
+    };
+    setEditingCourse(courseWithLessons);
   };
 
   const handleSaveCourse = async () => {
     if (!editingCourse) return;
 
     try {
+      console.log('Saving course with lessons:', editingCourse);
       // In a real app, this would call the API
       setCourses(prev => 
         prev.map(course => 
-          course.id === editingCourse.id ? editingCourse : course
+          course.id === editingCourse.id ? { ...editingCourse } : course
         )
       );
       setEditingCourse(null);
@@ -80,11 +86,17 @@ const AdminDashboard = () => {
   };
 
   const handleLessonsChange = (courseId: string, lessons: Lesson[]) => {
+    console.log('Updating lessons for course:', courseId, lessons);
     setCourses(prev => 
       prev.map(course => 
         course.id === courseId ? { ...course, lessons } : course
       )
     );
+    
+    // Also update the editing course if it's the same course
+    if (editingCourse && editingCourse.id === courseId) {
+      setEditingCourse(prev => prev ? { ...prev, lessons } : null);
+    }
   };
 
   const getCourseLessons = (courseId: string): Lesson[] => {
@@ -332,7 +344,9 @@ const AdminDashboard = () => {
                               {course.level.charAt(0).toUpperCase() + course.level.slice(1)}
                             </span>
                             <span className="text-sm text-gray-500">{course.duration} minutes</span>
-                            <span className="text-sm text-gray-500">{course.syllabus.length} lessons</span>
+                            <span className="text-sm text-gray-500">
+                              {course.lessons?.length || course.syllabus.length} lessons
+                            </span>
                             <span className={`px-2 py-1 text-xs font-medium rounded-full ${
                               course.isPublished ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
                             }`}>
