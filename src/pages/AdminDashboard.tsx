@@ -3,8 +3,10 @@ import { useAuth } from '@/hooks/useAuthContext';
 import { demoCourses } from '@/data/demoData';
 import Button from '@/components/Button';
 import Input from '@/components/Input';
-import { Plus, Edit, Trash2, Users, BookOpen, Award, LogOut, Save, X, Search } from 'lucide-react';
+import LessonManager from '@/components/LessonManager';
+import { Plus, Edit, Trash2, Users, BookOpen, Award, LogOut, Save, X, Search, Play } from 'lucide-react';
 import { apiService } from '@/services/api';
+import { Lesson } from '@/types';
 
 interface Course {
   id: string;
@@ -14,6 +16,7 @@ interface Course {
   duration: number;
   isPublished?: boolean;
   syllabus: any[];
+  lessons?: Lesson[];
 }
 
 const AdminDashboard = () => {
@@ -23,6 +26,7 @@ const AdminDashboard = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
+  const [selectedCourseId, setSelectedCourseId] = useState<string | null>(null);
 
   // Load courses from API
   useEffect(() => {
@@ -73,6 +77,19 @@ const AdminDashboard = () => {
     } catch (error) {
       console.error('Error deleting course:', error);
     }
+  };
+
+  const handleLessonsChange = (courseId: string, lessons: Lesson[]) => {
+    setCourses(prev => 
+      prev.map(course => 
+        course.id === courseId ? { ...course, lessons } : course
+      )
+    );
+  };
+
+  const getCourseLessons = (courseId: string): Lesson[] => {
+    const course = courses.find(c => c.id === courseId);
+    return course?.lessons || [];
   };
 
   const filteredCourses = courses.filter(course =>
@@ -290,6 +307,15 @@ const AdminDashboard = () => {
                               Cancel
                             </Button>
                           </div>
+                        </div>
+
+                        {/* Lesson Management */}
+                        <div className="mt-6 pt-6 border-t border-gray-200">
+                          <LessonManager
+                            courseId={editingCourse.id}
+                            lessons={getCourseLessons(editingCourse.id)}
+                            onLessonsChange={(lessons) => handleLessonsChange(editingCourse.id, lessons)}
+                          />
                         </div>
                       </div>
                     ) : (

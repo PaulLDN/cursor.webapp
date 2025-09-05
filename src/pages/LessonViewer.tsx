@@ -1,7 +1,9 @@
 import { useParams, Link } from 'react-router-dom';
 import { demoCourses } from '@/data/demoData';
 import Button from '@/components/Button';
-import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
+import VideoPlayer from '@/components/VideoPlayer';
+import { ChevronLeft, ChevronRight, CheckCircle, Play, FileText, Video, HelpCircle } from 'lucide-react';
+import { Lesson } from '@/types';
 
 const LessonViewer = () => {
   const { courseId, slideIndex } = useParams<{ courseId: string; slideIndex: string }>();
@@ -21,11 +23,25 @@ const LessonViewer = () => {
     );
   }
 
-  const currentSlide = course.syllabus[currentSlideIndex];
-  const isLastSlide = currentSlideIndex === course.syllabus.length - 1;
-  const isFirstSlide = currentSlideIndex === 0;
+  // Check if we have lessons or fall back to syllabus
+  const lessons = (course as any).lessons || course.syllabus.map((slide, index) => ({
+    id: slide.id,
+    title: slide.title,
+    description: slide.content.substring(0, 100) + '...',
+    type: slide.mediaType === 'video' ? 'video' : 'text',
+    content: slide.content,
+    videoUrl: slide.mediaUrl,
+    duration: 5,
+    order: index + 1,
+    isPublished: true,
+    courseId: course.id
+  }));
 
-  if (!currentSlide) {
+  const currentLesson = lessons[currentSlideIndex];
+  const isLastLesson = currentSlideIndex === lessons.length - 1;
+  const isFirstLesson = currentSlideIndex === 0;
+
+  if (!currentLesson) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -37,6 +53,19 @@ const LessonViewer = () => {
       </div>
     );
   }
+
+  const getLessonIcon = (type: string) => {
+    switch (type) {
+      case 'video':
+        return <Video className="h-5 w-5" />;
+      case 'quiz':
+        return <HelpCircle className="h-5 w-5" />;
+      case 'slide':
+        return <FileText className="h-5 w-5" />;
+      default:
+        return <FileText className="h-5 w-5" />;
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -50,9 +79,12 @@ const LessonViewer = () => {
               </Link>
             </div>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                Lesson {currentSlideIndex + 1} of {course.syllabus.length}
-              </span>
+              <div className="flex items-center space-x-2">
+                {getLessonIcon(currentLesson.type)}
+                <span className="text-sm text-gray-600">
+                  Lesson {currentSlideIndex + 1} of {lessons.length}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -63,31 +95,59 @@ const LessonViewer = () => {
         <div className="mb-8">
           <div className="flex justify-between text-sm text-gray-600 mb-2">
             <span>Progress</span>
-            <span>{Math.round(((currentSlideIndex + 1) / course.syllabus.length) * 100)}%</span>
+            <span>{Math.round(((currentSlideIndex + 1) / lessons.length) * 100)}%</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div 
               className="bg-gradient-corporate h-2 rounded-full transition-all duration-300"
-              style={{ width: `${((currentSlideIndex + 1) / course.syllabus.length) * 100}%` }}
+              style={{ width: `${((currentSlideIndex + 1) / lessons.length) * 100}%` }}
             />
           </div>
         </div>
 
         {/* Lesson Content */}
         <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-6">{currentSlide.title}</h1>
-          
-          <div className="prose prose-lg max-w-none">
-            <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-              {currentSlide.content}
-            </div>
+          <div className="flex items-center space-x-3 mb-6">
+            {getLessonIcon(currentLesson.type)}
+            <h1 className="text-3xl font-bold text-gray-900">{currentLesson.title}</h1>
           </div>
+          
+          {currentLesson.description && (
+            <p className="text-lg text-gray-600 mb-6">{currentLesson.description}</p>
+          )}
 
-          {currentSlide.mediaUrl && (
-            <div className="mt-8">
-              <div className="bg-gray-100 rounded-lg p-8 text-center">
-                <p className="text-gray-600">Media placeholder: {currentSlide.mediaUrl}</p>
+          {/* Video Lesson */}
+          {currentLesson.type === 'video' && currentLesson.videoUrl && (
+            <div className="mb-8">
+              <VideoPlayer
+                videoUrl={currentLesson.videoUrl}
+                title={currentLesson.title}
+                className="w-full h-96"
+              />
+            </div>
+          )}
+
+          {/* Text Content */}
+          {currentLesson.content && (
+            <div className="prose prose-lg max-w-none">
+              <div className="whitespace-pre-line text-gray-700 leading-relaxed">
+                {currentLesson.content}
               </div>
+            </div>
+          )}
+
+          {/* Quiz Lesson */}
+          {currentLesson.type === 'quiz' && (
+            <div className="mt-8 p-6 bg-blue-50 rounded-lg">
+              <div className="flex items-center space-x-2 mb-4">
+                <HelpCircle className="h-6 w-6 text-blue-600" />
+                <h3 className="text-lg font-semibold text-blue-900">Quiz Lesson</h3>
+              </div>
+              <p className="text-blue-800">This lesson contains quiz questions. Complete the quiz to proceed.</p>
+              <Button className="mt-4">
+                <Play className="h-4 w-4 mr-2" />
+                Start Quiz
+              </Button>
             </div>
           )}
         </div>
@@ -95,7 +155,7 @@ const LessonViewer = () => {
         {/* Navigation */}
         <div className="flex justify-between items-center">
           <div>
-            {!isFirstSlide && (
+            {!isFirstLesson && (
               <Link to={`/courses/${course.id}/lesson/${currentSlideIndex - 1}`}>
                 <Button variant="outline">
                   <ChevronLeft className="h-4 w-4 mr-2" />
@@ -111,7 +171,7 @@ const LessonViewer = () => {
               Mark Complete
             </Button>
             
-            {!isLastSlide ? (
+            {!isLastLesson ? (
               <Link to={`/courses/${course.id}/lesson/${currentSlideIndex + 1}`}>
                 <Button>
                   Next

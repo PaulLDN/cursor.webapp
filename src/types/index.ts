@@ -30,6 +30,23 @@ export interface Slide {
   mediaUrl?: string;
   mediaType?: 'image' | 'video';
   order: number;
+  duration: number; // in minutes
+  isPublished: boolean;
+}
+
+export interface Lesson {
+  id: string;
+  title: string;
+  description: string;
+  type: 'slide' | 'video' | 'quiz' | 'text';
+  content: string;
+  videoUrl?: string;
+  imageUrl?: string;
+  duration: number; // in minutes
+  order: number;
+  isPublished: boolean;
+  slides?: Slide[]; // for slide-based lessons
+  courseId: string;
 }
 
 export interface QuizQuestion {
