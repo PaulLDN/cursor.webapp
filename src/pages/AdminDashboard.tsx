@@ -11,6 +11,7 @@ import { lessonStorage } from '@/utils/lessonStorage';
 
 interface Course {
   id: string;
+  _id?: string; // MongoDB ObjectId
   title: string;
   description: string;
   level: string;
@@ -43,15 +44,21 @@ const AdminDashboard = () => {
         const coursesWithLessons = await Promise.all(
           response.data.map(async (course) => {
             try {
-              const lessonsResponse = await apiService.getCourseLessons(course.id);
+              // Use MongoDB _id for API calls, but keep both id and _id for frontend
+              const courseId = course._id || course.id;
+              const lessonsResponse = await apiService.getCourseLessons(courseId);
               return {
                 ...course,
+                id: course._id || course.id, // Ensure id is set
+                _id: course._id, // Keep MongoDB _id
                 lessons: lessonsResponse.success ? lessonsResponse.data : []
               };
             } catch (error) {
               console.error(`Error loading lessons for course ${course.id}:`, error);
               return {
                 ...course,
+                id: course._id || course.id,
+                _id: course._id,
                 lessons: []
               };
             }
@@ -136,8 +143,19 @@ const AdminDashboard = () => {
     console.log('Updating lessons for course:', courseId, lessons);
     
     try {
+      // Find the course to get the correct MongoDB ID
+      const course = courses.find(c => c.id === courseId);
+      if (!course) {
+        console.error('Course not found:', courseId);
+        return;
+      }
+      
+      // Use the MongoDB _id if available, otherwise use the courseId
+      const mongoId = course._id || courseId;
+      console.log('Using MongoDB ID:', mongoId);
+      
       // Save to MongoDB via API
-      const response = await apiService.updateCourseLessons(courseId, lessons);
+      const response = await apiService.updateCourseLessons(mongoId, lessons);
       if (response.success) {
         console.log('Lessons saved to database successfully');
         
@@ -153,7 +171,7 @@ const AdminDashboard = () => {
           setEditingCourse(prev => prev ? { ...prev, lessons } : null);
         }
       } else {
-        console.error('Failed to save lessons to database');
+        console.error('Failed to save lessons to database:', response);
         // Still update local state as fallback
         setCourses(prev => 
           prev.map(course => 
