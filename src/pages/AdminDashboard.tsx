@@ -7,6 +7,7 @@ import LessonManager from '@/components/LessonManager';
 import { Plus, Edit, Trash2, Users, BookOpen, Award, LogOut, Save, X, Search, Play } from 'lucide-react';
 import { apiService } from '@/services/api';
 import { Lesson } from '@/types';
+import { lessonStorage } from '@/utils/lessonStorage';
 
 interface Course {
   id: string;
@@ -38,11 +39,20 @@ const AdminDashboard = () => {
       setLoading(true);
       const response = await apiService.getCourses();
       if (response.success) {
-        setCourses(response.data);
+        // Load lessons from localStorage for each course
+        const coursesWithLessons = response.data.map(course => ({
+          ...course,
+          lessons: lessonStorage.getLessons(course.id)
+        }));
+        setCourses(coursesWithLessons);
       }
     } catch (error) {
-      // Fallback to demo data
-      setCourses(demoCourses);
+      // Fallback to demo data with lessons from localStorage
+      const coursesWithLessons = demoCourses.map(course => ({
+        ...course,
+        lessons: lessonStorage.getLessons(course.id)
+      }));
+      setCourses(coursesWithLessons);
     } finally {
       setLoading(false);
     }
@@ -87,6 +97,10 @@ const AdminDashboard = () => {
 
   const handleLessonsChange = (courseId: string, lessons: Lesson[]) => {
     console.log('Updating lessons for course:', courseId, lessons);
+    
+    // Save to localStorage
+    lessonStorage.saveLessons(courseId, lessons);
+    
     setCourses(prev => 
       prev.map(course => 
         course.id === courseId ? { ...course, lessons } : course
@@ -101,7 +115,8 @@ const AdminDashboard = () => {
 
   const getCourseLessons = (courseId: string): Lesson[] => {
     const course = courses.find(c => c.id === courseId);
-    return course?.lessons || [];
+    const storedLessons = lessonStorage.getLessons(courseId);
+    return course?.lessons || storedLessons || [];
   };
 
   const filteredCourses = courses.filter(course =>

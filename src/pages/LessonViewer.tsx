@@ -4,6 +4,7 @@ import Button from '@/components/Button';
 import VideoPlayer from '@/components/VideoPlayer';
 import { ChevronLeft, ChevronRight, CheckCircle, Play, FileText, Video, HelpCircle } from 'lucide-react';
 import { Lesson } from '@/types';
+import { lessonStorage } from '@/utils/lessonStorage';
 
 const LessonViewer = () => {
   const { courseId, slideIndex } = useParams<{ courseId: string; slideIndex: string }>();
@@ -23,8 +24,9 @@ const LessonViewer = () => {
     );
   }
 
-  // Check if we have lessons or fall back to syllabus
-  const lessons = (course as any).lessons || course.syllabus.map((slide, index) => ({
+  // Check if we have lessons from localStorage or fall back to syllabus
+  const storedLessons = lessonStorage.getLessons(courseId || '');
+  const lessons = storedLessons.length > 0 ? storedLessons : course.syllabus.map((slide, index) => ({
     id: slide.id,
     title: slide.title,
     description: slide.content.substring(0, 100) + '...',
