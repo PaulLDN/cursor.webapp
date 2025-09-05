@@ -1,16 +1,45 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { demoCourses } from '@/data/demoData';
+import { apiService } from '@/services/api';
 import Button from '@/components/Button';
 import { CheckCircle, XCircle, ArrowLeft, ArrowRight } from 'lucide-react';
 
 const QuizPage = () => {
   const { courseId } = useParams<{ courseId: string }>();
-  const course = demoCourses.find(c => c.id === courseId);
+  const [course, setCourse] = useState<any>(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState<number[]>(new Array(20).fill(-1));
   const [showResults, setShowResults] = useState(false);
   const [score, setScore] = useState(0);
+
+  // Load course data
+  useEffect(() => {
+    const loadCourse = async () => {
+      try {
+        // First try to find course in demo data (for slug-based URLs)
+        let foundCourse = demoCourses.find(c => c.id === courseId);
+        
+        // If not found in demo data, try API (for MongoDB _id-based URLs)
+        if (!foundCourse) {
+          const response = await apiService.getCourses();
+          if (response.success && response.data) {
+            foundCourse = response.data.find((c: any) => c._id === courseId || c.id === courseId);
+          }
+        }
+
+        if (foundCourse) {
+          setCourse(foundCourse);
+        }
+      } catch (error) {
+        console.error('Error loading course:', error);
+      }
+    };
+
+    if (courseId) {
+      loadCourse();
+    }
+  }, [courseId]);
 
   if (!course) {
     return (
