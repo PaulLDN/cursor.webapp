@@ -66,6 +66,7 @@ const AdminDashboard = () => {
         );
         setCourses(coursesWithLessons);
         console.log('Courses loaded from database:', coursesWithLessons);
+        console.log('First course lessons:', coursesWithLessons[0]?.lessons);
       } else {
         console.log('No courses found in database, using demo data');
         // Fallback to demo data
@@ -200,6 +201,7 @@ const AdminDashboard = () => {
 
   const getCourseLessons = (courseId: string): Lesson[] => {
     const course = courses.find(c => c.id === courseId);
+    console.log('Getting lessons for course:', courseId, 'Course found:', course, 'Lessons:', course?.lessons);
     return course?.lessons || [];
   };
 
