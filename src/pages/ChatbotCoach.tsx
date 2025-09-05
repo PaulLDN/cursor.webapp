@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { apiService } from '@/services/api';
 import { useAuth } from '@/hooks/useAuthContext';
+import { demoCourses } from '@/data/demoData';
 import Button from '@/components/Button';
 import { Send, MessageCircle, ArrowRight, Loader2, Bot, User } from 'lucide-react';
 
@@ -24,19 +25,26 @@ const ChatbotCoach = () => {
   useEffect(() => {
     const loadCourse = async () => {
       try {
-        const response = await apiService.getCourses();
-        if (response.success && response.data) {
-          const foundCourse = response.data.find((c: any) => c._id === courseId || c.id === courseId);
-          if (foundCourse) {
-            setCourse(foundCourse);
-            // Initialize with AI greeting
-            setMessages([{
-              id: '1',
-              type: 'assistant',
-              content: `Hello! I'm your AI-powered pre-quiz coach for "${foundCourse.title}". I'm here to help you prepare for the quiz by answering any questions you might have about the course content. What would you like to know?`,
-              timestamp: new Date().toISOString()
-            }]);
+        // First try to find course in demo data (for slug-based URLs)
+        let foundCourse = demoCourses.find(c => c.id === courseId);
+        
+        // If not found in demo data, try API (for MongoDB _id-based URLs)
+        if (!foundCourse) {
+          const response = await apiService.getCourses();
+          if (response.success && response.data) {
+            foundCourse = response.data.find((c: any) => c._id === courseId || c.id === courseId);
           }
+        }
+
+        if (foundCourse) {
+          setCourse(foundCourse);
+          // Initialize with AI greeting
+          setMessages([{
+            id: '1',
+            type: 'assistant',
+            content: `Hello! I'm your AI-powered pre-quiz coach for "${foundCourse.title}". I'm here to help you prepare for the quiz by answering any questions you might have about the course content. What would you like to know?`,
+            timestamp: new Date().toISOString()
+          }]);
         }
       } catch (error) {
         console.error('Error loading course:', error);
