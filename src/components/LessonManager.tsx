@@ -14,6 +14,8 @@ const LessonManager: React.FC<LessonManagerProps> = ({ courseId, lessons, onLess
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
 
+  console.log('LessonManager received lessons:', lessons, 'for course:', courseId);
+
   const handleCreateLesson = () => {
     const newLesson: Lesson = {
       id: Date.now().toString(),

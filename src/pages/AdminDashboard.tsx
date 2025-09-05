@@ -67,6 +67,7 @@ const AdminDashboard = () => {
         setCourses(coursesWithLessons);
         console.log('Courses loaded from database:', coursesWithLessons);
         console.log('First course lessons:', coursesWithLessons[0]?.lessons);
+        console.log('GDPR course lessons:', coursesWithLessons.find(c => c.title.includes('GDPR'))?.lessons);
       } else {
         console.log('No courses found in database, using demo data');
         // Fallback to demo data
