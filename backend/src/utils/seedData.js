@@ -120,6 +120,53 @@ const seedData = async () => {
           answer: 'The key principles are: Lawfulness, fairness and transparency; Purpose limitation; Data minimisation; Accuracy; Storage limitation; Integrity and confidentiality; and Accountability.',
           relatedSlideIds: []
         }
+      ],
+      lessons: [
+        {
+          title: 'Introduction to GDPR',
+          description: 'Learn the basics of GDPR and its importance for organizations',
+          type: 'text',
+          content: 'The General Data Protection Regulation (GDPR) is a comprehensive data protection law that came into effect on May 25, 2018. It applies to all organizations that process personal data of EU residents, regardless of where the organization is located.',
+          duration: 15,
+          order: 1,
+          isPublished: true
+        },
+        {
+          title: 'What is Personal Data?',
+          description: 'Understanding what constitutes personal data under GDPR',
+          type: 'text',
+          content: 'Personal data is any information relating to an identified or identifiable natural person. This includes:\n\n• Names and identification numbers\n• Location data and online identifiers\n• Biometric data\n• Health information\n• Economic, cultural, or social identity data',
+          duration: 20,
+          order: 2,
+          isPublished: true
+        },
+        {
+          title: 'Key Principles of GDPR',
+          description: 'The seven fundamental principles that guide GDPR compliance',
+          type: 'text',
+          content: 'GDPR is built on seven key principles:\n\n1. **Lawfulness, fairness and transparency**\n2. **Purpose limitation**\n3. **Data minimisation**\n4. **Accuracy**\n5. **Storage limitation**\n6. **Integrity and confidentiality**\n7. **Accountability**',
+          duration: 25,
+          order: 3,
+          isPublished: true
+        },
+        {
+          title: 'Legal Basis for Processing',
+          description: 'Understanding when and how you can legally process personal data',
+          type: 'text',
+          content: 'You must have a legal basis for processing personal data:\n\n• **Consent** - Clear, informed, and freely given\n• **Contract** - Necessary for contract performance\n• **Legal obligation** - Required by law\n• **Vital interests** - Protecting life or health\n• **Public task** - Official authority or public interest\n• **Legitimate interests** - Business interests (with safeguards)',
+          duration: 30,
+          order: 4,
+          isPublished: true
+        },
+        {
+          title: 'Individual Rights',
+          description: 'The rights that individuals have over their personal data',
+          type: 'text',
+          content: 'GDPR grants individuals several important rights:\n\n• **Right to information** - Know how data is used\n• **Right of access** - Obtain copies of personal data\n• **Right to rectification** - Correct inaccurate data\n• **Right to erasure** - "Right to be forgotten"\n• **Right to restrict processing**\n• **Right to data portability**\n• **Right to object**',
+          duration: 30,
+          order: 5,
+          isPublished: true
+        }
       ]
     });
 
@@ -187,6 +234,44 @@ const seedData = async () => {
           question: 'What is Cross-Site Scripting (XSS)?',
           answer: 'XSS is a security vulnerability that allows attackers to inject malicious scripts into web pages viewed by other users, potentially stealing data or performing actions on behalf of users.',
           relatedSlideIds: []
+        }
+      ],
+      lessons: [
+        {
+          title: 'Introduction to Web Security',
+          description: 'Understanding the importance of web security in today\'s digital world',
+          type: 'text',
+          content: 'Web security is the practice of protecting websites, web applications, and web services from various cyber threats. In today\'s digital world, web security is crucial for:\n\n• Protecting user data\n• Maintaining business reputation\n• Ensuring compliance\n• Preventing financial losses',
+          duration: 15,
+          order: 1,
+          isPublished: true
+        },
+        {
+          title: 'HTTPS and SSL/TLS',
+          description: 'Learn how encryption protects data in transit',
+          type: 'text',
+          content: 'HTTPS (HTTP Secure) encrypts data between the browser and server:\n\n• **SSL/TLS protocols** provide encryption\n• **Certificate authorities** verify server identity\n• **Perfect Forward Secrecy** protects past communications\n• **HSTS** prevents downgrade attacks\n\n**Benefits**: Data integrity, authentication, privacy',
+          duration: 20,
+          order: 2,
+          isPublished: true
+        },
+        {
+          title: 'SQL Injection Overview',
+          description: 'Understanding one of the most common web vulnerabilities',
+          type: 'text',
+          content: 'SQL injection occurs when user input is improperly handled in database queries:\n\n• **Attack vector**: Malicious SQL code in input fields\n• **Impact**: Data theft, data manipulation, system compromise\n• **Common targets**: Login forms, search boxes, URL parameters\n\n**Example**: `\' OR \'1\'=\'1` in a login form',
+          duration: 25,
+          order: 3,
+          isPublished: true
+        },
+        {
+          title: 'Cross-Site Scripting (XSS)',
+          description: 'Learn about XSS attacks and how to prevent them',
+          type: 'text',
+          content: 'XSS allows attackers to inject malicious scripts into web pages:\n\n• **Stored XSS**: Scripts stored in database\n• **Reflected XSS**: Scripts reflected from user input\n• **DOM-based XSS**: Scripts executed in browser\n\n**Prevention**: Input validation, output encoding, Content Security Policy',
+          duration: 25,
+          order: 4,
+          isPublished: true
         }
       ]
     });
