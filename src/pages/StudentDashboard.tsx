@@ -7,9 +7,9 @@ const StudentDashboard = () => {
   const { user, logout } = useAuth();
 
   const stats = [
-    { label: 'Courses Enrolled', value: '2', icon: BookOpen, color: 'text-blue-600' },
+    { label: 'Courses Enrolled', value: '2', icon: BookOpen, color: 'text-corporate-secondary' },
     { label: 'Certificates Earned', value: '1', icon: Award, color: 'text-green-600' },
-    { label: 'Hours Completed', value: '3.5', icon: Clock, color: 'text-purple-600' },
+    { label: 'Hours Completed', value: '3.5', icon: Clock, color: 'text-corporate-primary' },
     { label: 'Average Score', value: '85%', icon: TrendingUp, color: 'text-orange-600' },
   ];
 

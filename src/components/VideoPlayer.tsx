@@ -233,14 +233,14 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ videoUrl, title, className = 
           height: 12px;
           width: 12px;
           border-radius: 50%;
-          background: #3b82f6;
+          background: #0067b8;
           cursor: pointer;
         }
         .slider::-moz-range-thumb {
           height: 12px;
           width: 12px;
           border-radius: 50%;
-          background: #3b82f6;
+          background: #0067b8;
           cursor: pointer;
           border: none;
         }

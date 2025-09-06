@@ -118,7 +118,7 @@ const LandingPage = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-20 bg-gradient-to-r from-blue-50 to-purple-50">
+      <section className="py-20 bg-gradient-to-r from-blue-50 to-blue-100">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <div>
@@ -170,7 +170,7 @@ const LandingPage = () => {
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Advance Your Career?
           </h2>
-          <p className="text-xl text-blue-100 mb-8">
+          <p className="text-xl text-white mb-8">
             Start your journey to professional excellence today. 
             No credit card required for demo access.
           </p>

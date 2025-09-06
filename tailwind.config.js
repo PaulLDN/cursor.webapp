@@ -53,8 +53,8 @@ export default {
         },
         // Custom corporate training colors
         corporate: {
-          primary: "#0B2B6B",
-          secondary: "#6A32C9",
+          primary: "#122c5f",
+          secondary: "#0067b8",
           success: "#34C759",
           warning: "#FFB020",
         }
@@ -89,8 +89,8 @@ export default {
         "slide-in": "slide-in 0.3s ease-out",
       },
       backgroundImage: {
-        'gradient-corporate': 'linear-gradient(135deg, #0B2B6B 0%, #6A32C9 100%)',
-        'gradient-corporate-hover': 'linear-gradient(135deg, #0A2560 0%, #5A2AB8 100%)',
+        'gradient-corporate': 'linear-gradient(135deg, #122c5f 0%, #0067b8 100%)',
+        'gradient-corporate-hover': 'linear-gradient(135deg, #0f2554 0%, #005aa3 100%)',
       }
     },
   },

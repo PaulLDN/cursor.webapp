@@ -64,17 +64,17 @@ const LoginPage = () => {
 
         {/* Demo Credentials */}
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <h3 className="text-sm font-medium text-blue-900 mb-2">Demo Credentials:</h3>
+          <h3 className="text-sm font-medium text-corporate-primary mb-2">Demo Credentials:</h3>
           <div className="space-y-2">
             <button
               onClick={() => handleDemoLogin('student')}
-              className="block w-full text-left text-sm text-blue-700 hover:text-blue-900"
+              className="block w-full text-left text-sm text-corporate-secondary hover:text-corporate-primary"
             >
               <strong>Student:</strong> student@example.com / password
             </button>
             <button
               onClick={() => handleDemoLogin('admin')}
-              className="block w-full text-left text-sm text-blue-700 hover:text-blue-900"
+              className="block w-full text-left text-sm text-corporate-secondary hover:text-corporate-primary"
             >
               <strong>Admin:</strong> admin@example.com / password
             </button>
