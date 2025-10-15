@@ -81,7 +81,7 @@ const QuizPage = () => {
 
   const handleSubmit = () => {
     let correctAnswers = 0;
-    questions.forEach((question, index) => {
+    questions.forEach((question: QuizQuestion, index: number) => {
       if (answers[index] === question.correctIndex) {
         correctAnswers++;
       }
@@ -261,7 +261,7 @@ const QuizPage = () => {
             </div>
             <div className="flex items-center space-x-4">
               <span className="text-gray-600">
-                {answers.filter(a => a !== -1).length} / {questions.length} answered
+                {answers.filter((a: number) => a !== -1).length} / {questions.length} answered
               </span>
               <span className="font-bold text-corporate-primary">
                 {Math.round(((currentQuestionIndex + 1) / questions.length) * 100)}%
@@ -305,7 +305,7 @@ const QuizPage = () => {
             </h2>
             
             <div className="space-y-4">
-              {currentQuestion.options.map((option, index) => {
+              {currentQuestion.options.map((option: string, index: number) => {
                 const isSelected = answers[currentQuestionIndex] === index;
                 const optionLabels = ['A', 'B', 'C', 'D'];
                 
