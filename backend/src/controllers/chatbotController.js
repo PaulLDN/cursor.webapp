@@ -1,10 +1,19 @@
 const OpenAI = require('openai');
-const Course = require('../models/Course');
+const { validationResult } = require('express-validator');
+const db = require('../db/inMemoryDB');
 
-// Initialize OpenAI
+// Initialize OpenAI (paid)
 const openai = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your-openai-api-key-here' 
   ? new OpenAI({
       apiKey: process.env.OPENAI_API_KEY,
+    })
+  : null;
+
+// Initialize Groq (FREE alternative - llama-3.1-70b-versatile)
+const groq = process.env.GROQ_API_KEY && process.env.GROQ_API_KEY !== 'your-groq-api-key-here'
+  ? new OpenAI({
+      apiKey: process.env.GROQ_API_KEY,
+      baseURL: 'https://api.groq.com/openai/v1'
     })
   : null;
 
@@ -14,7 +23,8 @@ const generateFallbackResponse = async (message, courseId, context) => {
     // Get course data for context-aware responses
     let course = null;
     if (courseId) {
-      course = await Course.findById(courseId);
+      // Use in-memory database to find course
+      course = db.courses.find(c => c._id === courseId || c.id === courseId);
     }
 
     const lowerMessage = message.toLowerCase();
@@ -310,8 +320,65 @@ Use this context to provide more relevant and personalized responses.`;
 
     let aiResponse;
 
-    // Try OpenAI API first if available
-    if (openai) {
+    // Try Groq API first (FREE - llama-3.1-70b-versatile)
+    if (groq) {
+      try {
+        const completion = await groq.chat.completions.create({
+          model: "llama-3.1-70b-versatile", // FREE model
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt
+            },
+            {
+              role: "user",
+              content: message
+            }
+          ],
+          max_tokens: 500,
+          temperature: 0.7,
+        });
+
+        aiResponse = completion.choices[0].message.content;
+        console.log(`✅ Groq AI (FREE) - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+      } catch (groqError) {
+        console.error('Groq API error, trying OpenAI:', groqError.message);
+        
+        // Try OpenAI API as second option if available
+        if (openai) {
+          try {
+            const completion = await openai.chat.completions.create({
+              model: "gpt-3.5-turbo",
+              messages: [
+                {
+                  role: "system",
+                  content: systemPrompt
+                },
+                {
+                  role: "user",
+                  content: message
+                }
+              ],
+              max_tokens: 500,
+              temperature: 0.7,
+            });
+
+            aiResponse = completion.choices[0].message.content;
+            console.log(`OpenAI Chat - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+          } catch (openaiError) {
+            console.error('OpenAI API error, falling back to intelligent responses:', openaiError.message);
+            // Fall back to intelligent responses
+            aiResponse = await generateFallbackResponse(message, courseId, context);
+            console.log(`Fallback Chat - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+          }
+        } else {
+          // Fall back to intelligent responses
+          aiResponse = await generateFallbackResponse(message, courseId, context);
+          console.log(`Fallback Chat - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+        }
+      }
+    } else if (openai) {
+      // Try OpenAI if Groq not available
       try {
         const completion = await openai.chat.completions.create({
           model: "gpt-3.5-turbo",

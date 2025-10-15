@@ -41,7 +41,16 @@ class ApiService {
     }
 
     try {
-      const response = await fetch(url, config);
+      // Add timeout to prevent slow requests (2 seconds)
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      
+      const response = await fetch(url, {
+        ...config,
+        signal: controller.signal
+      });
+      
+      clearTimeout(timeoutId);
       const data = await response.json();
 
       if (!response.ok) {

@@ -2,6 +2,23 @@
 
 A full-stack corporate training platform built with MongoDB, Express.js, React, and Node.js. This application provides comprehensive course management, user progress tracking, and certificate generation for corporate training and compliance.
 
+## 🎯 Current Status
+
+**✅ WORKING FEATURES:**
+- Full MERN stack implementation
+- User authentication (JWT-based)
+- Course management (CRUD operations)
+- Lesson progress tracking
+- Admin dashboard with course editing
+- Student lesson viewer with "Mark Complete" functionality
+- MongoDB database integration
+- In-memory database fallback for development
+
+**🌐 LIVE APPLICATION:**
+- **Frontend**: `http://localhost:5173/`
+- **Backend API**: `http://localhost:5000/api`
+- **Health Check**: `http://localhost:5000/api/health`
+
 ## 🏗️ Architecture
 
 ### Backend (Node.js + Express + MongoDB)

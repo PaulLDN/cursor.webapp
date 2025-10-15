@@ -18,7 +18,7 @@ const RegisterPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { register } = useAuth();
+  const { register, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -41,7 +41,16 @@ const RegisterPage = () => {
     try {
       const success = await register(formData.email, formData.password, formData.name, formData.role);
       if (success) {
-        navigate('/dashboard');
+        // Check localStorage for immediate user data since context might not have updated yet
+        const savedUser = localStorage.getItem('user');
+        const userData = savedUser ? JSON.parse(savedUser) : user;
+        
+        // Redirect based on user role (which was selected during registration)
+        if (userData?.role === 'admin' || formData.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         setError('An account with this email already exists');
       }

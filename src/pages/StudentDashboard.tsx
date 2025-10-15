@@ -16,17 +16,17 @@ const StudentDashboard = () => {
   const recentCourses = [
     {
       id: 'gdpr-compliance',
-      title: 'GDPR Compliance Fundamentals',
+      title: 'GDPR Training Course (SME Edition)',
       progress: 75,
       lastAccessed: '2 days ago',
-      nextLesson: 'Data Protection Impact Assessment'
+      nextLesson: 'Module 4: Individuals\' Rights under GDPR'
     },
     {
       id: 'web-security-fundamentals',
-      title: 'Web Security Fundamentals',
+      title: 'Cybersecurity Training Course (SME Edition)',
       progress: 45,
       lastAccessed: '1 week ago',
-      nextLesson: 'Cross-Site Scripting (XSS)'
+      nextLesson: 'Module 2: Passwords and Authentication – Your First Line of Defense'
     }
   ];
 

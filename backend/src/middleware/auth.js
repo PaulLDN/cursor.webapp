@@ -1,5 +1,5 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/User');
+const db = require('../db/inMemoryDB');
 
 // Protect routes - verify JWT token
 const protect = async (req, res, next) => {
@@ -14,7 +14,13 @@ const protect = async (req, res, next) => {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
       // Get user from token
-      req.user = await User.findById(decoded.id).select('-password');
+      const user = db.findUserById(decoded.id);
+      if (user) {
+        const { password, ...userWithoutPassword } = user;
+        req.user = userWithoutPassword;
+      } else {
+        req.user = null;
+      }
 
       if (!req.user) {
         return res.status(401).json({

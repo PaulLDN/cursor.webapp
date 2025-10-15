@@ -1,19 +1,14 @@
 const express = require('express');
 const cors = require('cors');
-const mongoose = require('mongoose');
 const dotenv = require('dotenv');
 const errorHandler = require('./middleware/errorHandler');
 
 // Load env vars
-dotenv.config({ path: '../config.env' });
+dotenv.config({ path: './config.env' });
 
-// Connect to database
-mongoose.connect(process.env.MONGODB_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => console.log('MongoDB connected'))
-.catch(err => console.error('MongoDB connection error:', err));
+// Initialize in-memory database
+const db = require('./db/inMemoryDB');
+console.log('✅ In-memory database initialized');
 
 const app = express();
 
@@ -26,8 +21,10 @@ app.use(cors({
   origin: [
     process.env.FRONTEND_URL || 'http://localhost:5173',
     'http://localhost:5174',
-    'http://localhost:5178',
-    'http://localhost:5173'
+    'http://localhost:5175',
+    'http://localhost:5176',
+    'http://localhost:5177',
+    'http://localhost:5178'
   ],
   credentials: true
 }));

@@ -1,5 +1,4 @@
-const Course = require('../models/Course');
-const UserProgress = require('../models/UserProgress');
+const db = require('../db/inMemoryDB');
 const { validationResult } = require('express-validator');
 
 // @desc    Get all courses
@@ -9,31 +8,37 @@ const getCourses = async (req, res) => {
   try {
     const { level, search, page = 1, limit = 10 } = req.query;
     
-    let query = { isPublished: true };
+    let courses = db.getAllCourses().filter(course => course.isPublished);
     
     // Filter by level
     if (level) {
-      query.level = level;
+      courses = courses.filter(course => course.level === level);
     }
     
-    // Search functionality
+    // Search functionality (simple text search)
     if (search) {
-      query.$text = { $search: search };
+      const searchLower = search.toLowerCase();
+      courses = courses.filter(course => 
+        course.title.toLowerCase().includes(searchLower) ||
+        course.description.toLowerCase().includes(searchLower) ||
+        course.tags.some(tag => tag.toLowerCase().includes(searchLower))
+      );
     }
 
-    const courses = await Course.find(query)
-      .populate('createdBy', 'name')
-      .sort({ createdAt: -1 })
-      .limit(limit * 1)
-      .skip((page - 1) * limit);
+    // Sort by creation date (newest first)
+    courses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 
-    const total = await Course.countDocuments(query);
+    // Pagination
+    const total = courses.length;
+    const startIndex = (page - 1) * limit;
+    const endIndex = startIndex + parseInt(limit);
+    const paginatedCourses = courses.slice(startIndex, endIndex);
 
     res.json({
       success: true,
-      count: courses.length,
+      count: paginatedCourses.length,
       total,
-      data: courses
+      data: paginatedCourses
     });
   } catch (error) {
     console.error('Get courses error:', error);
@@ -49,9 +54,7 @@ const getCourses = async (req, res) => {
 // @access  Public
 const getCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id)
-      .populate('createdBy', 'name')
-      .populate('enrolledStudents', 'name email');
+    const course = db.findCourseById(req.params.id);
 
     if (!course) {
       return res.status(404).json({
@@ -92,7 +95,7 @@ const createCourse = async (req, res) => {
       createdBy: req.user.id
     };
 
-    const course = await Course.create(courseData);
+    const course = db.createCourse(courseData);
 
     res.status(201).json({
       success: true,
@@ -112,7 +115,7 @@ const createCourse = async (req, res) => {
 // @access  Private (Admin only)
 const updateCourse = async (req, res) => {
   try {
-    let course = await Course.findById(req.params.id);
+    let course = db.findCourseById(req.params.id);
 
     if (!course) {
       return res.status(404).json({
@@ -129,10 +132,9 @@ const updateCourse = async (req, res) => {
       });
     }
 
-    course = await Course.findByIdAndUpdate(req.params.id, req.body, {
-      new: true,
-      runValidators: true
-    });
+    // Update course in memory database
+    Object.assign(course, req.body);
+    course.updatedAt = new Date();
 
     res.json({
       success: true,
@@ -152,7 +154,7 @@ const updateCourse = async (req, res) => {
 // @access  Private (Admin only)
 const deleteCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = db.findCourseById(req.params.id);
 
     if (!course) {
       return res.status(404).json({
@@ -169,12 +171,20 @@ const deleteCourse = async (req, res) => {
       });
     }
 
-    await course.deleteOne();
+    // Delete course from in-memory database
+    const deleted = db.deleteCourse(req.params.id);
 
-    res.json({
-      success: true,
-      message: 'Course deleted successfully'
-    });
+    if (deleted) {
+      res.json({
+        success: true,
+        message: 'Course deleted successfully'
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to delete course'
+      });
+    }
   } catch (error) {
     console.error('Delete course error:', error);
     res.status(500).json({
@@ -189,7 +199,7 @@ const deleteCourse = async (req, res) => {
 // @access  Private
 const enrollInCourse = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = db.findCourseById(req.params.id);
 
     if (!course) {
       return res.status(404).json({
@@ -198,11 +208,8 @@ const enrollInCourse = async (req, res) => {
       });
     }
 
-    // Check if already enrolled
-    const existingProgress = await UserProgress.findOne({
-      userId: req.user.id,
-      courseId: req.params.id
-    });
+    // Check if already enrolled (using in-memory database)
+    const existingProgress = db.getUserProgress(req.user.id, req.params.id);
 
     if (existingProgress) {
       return res.status(400).json({
@@ -211,15 +218,20 @@ const enrollInCourse = async (req, res) => {
       });
     }
 
-    // Create progress record
-    await UserProgress.create({
+    // Create progress record in in-memory database
+    db.createUserProgress({
       userId: req.user.id,
-      courseId: req.params.id
+      courseId: req.params.id,
+      completedLessons: [],
+      progress: 0,
+      enrolledAt: new Date()
     });
 
     // Add user to course enrolled students
+    if (!course.enrolledStudents) {
+      course.enrolledStudents = [];
+    }
     course.enrolledStudents.push(req.user.id);
-    await course.save();
 
     res.json({
       success: true,
@@ -239,7 +251,7 @@ const enrollInCourse = async (req, res) => {
 // @access  Private/Admin
 const updateCourseLessons = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id);
+    const course = db.findCourseById(req.params.id);
     
     if (!course) {
       return res.status(404).json({
@@ -250,7 +262,7 @@ const updateCourseLessons = async (req, res) => {
 
     // Update lessons
     course.lessons = req.body.lessons;
-    await course.save();
+    course.updatedAt = new Date();
 
     res.json({
       success: true,
@@ -271,7 +283,7 @@ const updateCourseLessons = async (req, res) => {
 // @access  Public
 const getCourseLessons = async (req, res) => {
   try {
-    const course = await Course.findById(req.params.id).select('lessons');
+    const course = db.findCourseById(req.params.id);
     
     if (!course) {
       return res.status(404).json({

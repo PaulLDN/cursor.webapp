@@ -15,7 +15,7 @@ router.post('/chat', protect, [
     .withMessage('Message is required'),
   body('courseId')
     .optional()
-    .isMongoId()
+    .isString()
     .withMessage('Invalid course ID'),
   body('context')
     .optional()

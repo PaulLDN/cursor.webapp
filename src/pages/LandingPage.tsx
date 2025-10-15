@@ -71,9 +71,9 @@ const LandingPage = () => {
               Build expertise with interactive courses, expert guidance, and industry-recognized certificates.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Link to="/courses">
+              <Link to="/login">
                 <Button size="lg" className="w-full sm:w-auto">
-                  Browse Courses
+                  Student Login
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </Button>
               </Link>
@@ -165,7 +165,12 @@ const LandingPage = () => {
       </section>
 
       {/* CTA Section */}
-      <section className="py-20 bg-gradient-corporate">
+      <section 
+        className="py-20" 
+        style={{ 
+          background: 'linear-gradient(135deg, #122c5f 0%, #0067b8 100%)' 
+        }}
+      >
         <div className="max-w-4xl mx-auto text-center px-4 sm:px-6 lg:px-8">
           <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
             Ready to Advance Your Career?
@@ -182,7 +187,7 @@ const LandingPage = () => {
               </Button>
             </Link>
             <Link to="/courses">
-              <Button size="lg" variant="outline" className="w-full sm:w-auto border-white text-white hover:bg-white hover:text-corporate-primary">
+              <Button size="lg" variant="outline" className="w-full sm:w-auto border-2 border-white text-white bg-transparent hover:bg-white hover:text-blue-600 transition-all duration-200">
                 View Course Catalog
               </Button>
             </Link>

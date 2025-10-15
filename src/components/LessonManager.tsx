@@ -16,6 +16,17 @@ const LessonManager: React.FC<LessonManagerProps> = ({ courseId, lessons, onLess
 
   console.log('LessonManager received lessons:', lessons, 'for course:', courseId);
 
+  // Add error boundary and validation
+  if (!lessons || !Array.isArray(lessons)) {
+    console.error('LessonManager: Invalid lessons prop:', lessons);
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+        <p className="text-red-600">Error: Invalid lessons data received</p>
+        <p className="text-sm text-red-500 mt-1">Lessons: {JSON.stringify(lessons)}</p>
+      </div>
+    );
+  }
+
   const handleCreateLesson = () => {
     const newLesson: Lesson = {
       id: Date.now().toString(),

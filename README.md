@@ -1,208 +1,257 @@
-# Corporate Training Platform
+# 🎓 Corporate Training Platform - MERN Stack
 
-A modern, professional online training platform for corporate training and compliance, focused on GDPR & Web Security. Built with React, TypeScript, Tailwind CSS, and shadcn/ui.
+A modern, full-featured corporate training platform built with the MERN stack (MongoDB, Express.js, React, Node.js). This application provides interactive courses on GDPR compliance and cybersecurity awareness, complete with quizzes, progress tracking, certificates, and an AI-powered chatbot coach.
 
-## 🚀 Features
+## ✨ Features
 
-### Core Functionality
-- **Role-based Authentication** - Student and Admin roles with protected routes
-- **Course Management** - Complete course catalog with filtering and search
-- **Interactive Learning** - Slide-based lessons with progress tracking
-- **Pre-Quiz Coach** - AI-powered chatbot for quiz preparation
-- **Assessment System** - 20-question quizzes with instant scoring
-- **Certificate Generation** - Professional certificates with PDF export
-- **Progress Tracking** - Comprehensive analytics and progress monitoring
-- **Admin Dashboard** - Full CRUD operations for courses and content
+### 🎯 For Students
+- **Interactive Courses**: Professionally structured courses on GDPR and Cybersecurity
+- **Rich Content Display**: Beautiful formatting with headings, lists, highlights, and emojis
+- **Gamification**: XP system, progress milestones, and celebration animations
+- **Quizzes**: Comprehensive assessments with instant feedback and visual progress
+- **Progress Tracking**: Real-time tracking of course completion and quiz scores
+- **Certificates**: Downloadable certificates (PDF/PNG) upon course completion
+- **AI Chatbot Coach**: Pre-quiz preparation assistant powered by free Groq AI (llama-3.1-70b)
+- **Responsive Design**: Modern UI built with Tailwind CSS
 
-### Design & UX
-- **Professional Theme** - Deep blue to purple gradient design
-- **Responsive Design** - Mobile-first approach with desktop scaling
-- **Smooth Animations** - Micro-interactions and transitions
-- **Accessibility** - Keyboard navigation and ARIA labels
-- **Modern UI** - Card-based layouts with generous whitespace
+### 👨‍💼 For Administrators
+- **Dashboard**: Overview of all students and their progress
+- **Course Management**: Create, edit, and manage course content
+- **Analytics**: Track completion rates and quiz performance
+- **User Management**: View and manage student accounts
 
-## 🛠️ Tech Stack
-
-- **Frontend**: React 18 + TypeScript
-- **Styling**: Tailwind CSS + shadcn/ui components
-- **Build Tool**: Vite
-- **Routing**: React Router DOM
-- **Icons**: Lucide React
-- **State Management**: React Context + Hooks
-- **Persistence**: LocalStorage (demo-ready for backend integration)
-
-## 📚 Demo Courses
-
-### 1. GDPR Compliance Fundamentals
-- **Duration**: 120 minutes
-- **Level**: Intermediate
-- **Content**: 10 comprehensive slides covering GDPR principles, rights, and implementation
-- **Quiz**: 20 questions with detailed explanations
-- **Topics**: Personal data, legal basis, individual rights, data breaches, DPIA
-
-### 2. Web Security Fundamentals
-- **Duration**: 90 minutes
-- **Level**: Beginner
-- **Content**: 10 slides covering essential web security concepts
-- **Quiz**: 20 questions with practical scenarios
-- **Topics**: HTTPS, SQL injection, XSS, CSRF, authentication, security headers
-
-## 🔐 Demo Accounts
-
-### Student Account
-- **Email**: `student@example.com`
-- **Password**: `password`
-- **Access**: Course enrollment, lessons, quizzes, certificates
-
-### Admin Account
-- **Email**: `admin@example.com`
-- **Password**: `password`
-- **Access**: Course management, student progress, analytics
-
-## 🚀 Getting Started
+## 🚀 Quick Start
 
 ### Prerequisites
-- Node.js 18+ 
+- Node.js (v14 or higher)
 - npm or yarn
 
 ### Installation
 
 1. **Clone the repository**
    ```bash
-   git clone <repository-url>
-   cd corporate-training-platform
+   git clone https://github.com/PaulLDN/cursor.webapp.git
+   cd cursor.webapp
    ```
 
 2. **Install dependencies**
    ```bash
+   # Install frontend dependencies
    npm install
+
+   # Install backend dependencies
+   cd backend
+   npm install
+   cd ..
    ```
 
-3. **Start development server**
+3. **Set up environment variables**
    ```bash
+   # Copy the example config file
+   cp backend/config.env.example backend/config.env
+   ```
+
+4. **Get a FREE Groq API Key (Optional but Recommended)**
+   - Visit [https://console.groq.com/](https://console.groq.com/)
+   - Sign up for a free account
+   - Generate an API key
+   - Add it to `backend/config.env`:
+     ```
+     GROQ_API_KEY=your-actual-groq-api-key-here
+     ```
+
+5. **Run the application**
+   
+   **Option A: Windows (Easy)**
+   ```bash
+   # Double-click start-app.bat
+   # Or run from terminal:
+   start-app.bat
+   ```
+
+   **Option B: Manual (All OS)**
+   ```bash
+   # Terminal 1 - Backend
+   cd backend
+   node src/server.js
+
+   # Terminal 2 - Frontend
    npm run dev
    ```
 
-4. **Open your browser**
-   Navigate to `http://localhost:5173`
+6. **Access the application**
+   - Frontend: [http://localhost:5173](http://localhost:5173)
+   - Backend API: [http://localhost:5000](http://localhost:5000)
 
-### Available Scripts
+## 👥 Demo Accounts
 
-- `npm run dev` - Start development server
-- `npm run build` - Build for production
-- `npm run preview` - Preview production build
-- `npm run lint` - Run ESLint
+### Student Account
+- **Email**: `student@example.com`
+- **Password**: `password`
 
-## 📱 User Flows
+### Admin Account
+- **Email**: `admin@example.com`
+- **Password**: `password`
 
-### Student Journey
-1. **Landing Page** → Browse features and benefits
-2. **Login/Register** → Access with demo credentials
-3. **Dashboard** → View progress and continue learning
-4. **Course Catalog** → Browse and enroll in courses
-5. **Course Overview** → Review syllabus and start learning
-6. **Lesson Viewer** → Navigate through slides with progress tracking
-7. **Pre-Quiz Coach** → Chat with AI assistant for quiz preparation
-8. **Quiz System** → Take 20-question assessment with instant feedback
-9. **Certificate** → Download professional certificate upon passing
+## 📚 Course Content
 
-### Admin Journey
-1. **Admin Login** → Access admin dashboard
-2. **Course Management** → Create, edit, and manage courses
-3. **Content Management** → Add slides, quiz questions, and FAQ
-4. **Analytics** → Monitor student progress and completion rates
-5. **User Management** → View student enrollments and certificates
+### 1. GDPR Training Course (SME Edition)
+**6 comprehensive modules covering:**
+- Introduction to GDPR and Data Protection
+- Understanding Personal Data and Lawful Processing
+- The Seven Principles of GDPR
+- Individuals' Rights under GDPR
+- Data Security and Breach Management
+- Accountability, Compliance, and Best Practices
 
-## 🎨 Design System
+**Final Quiz**: 20 questions covering all modules
 
-### Colors
-- **Primary Gradient**: `#0B2B6B → #6A32C9`
-- **Success**: `#34C759`
-- **Warning**: `#FFB020`
-- **Neutral Grays**: For text and backgrounds
+### 2. Cybersecurity Training Course (SME Edition)
+**6 practical modules covering:**
+- Introduction to Cybersecurity
+- Passwords and Authentication
+- Secure Use of Devices and Networks
+- Phishing and Social Engineering
+- Safe Data Handling and Physical Security
+- Incident Response and Reporting
 
-### Typography
-- **Font Stack**: Inter or system font stack
-- **Hierarchy**: Clear heading and body text styles
+**Final Quiz**: 20 questions covering all modules
 
-### Components
-- **Buttons**: Multiple variants with hover states
-- **Cards**: Consistent spacing and shadows
-- **Forms**: Accessible inputs with validation
-- **Navigation**: Responsive with active states
+## 🤖 AI Chatbot Features
 
-## 🔧 Architecture
+The platform includes an AI-powered chatbot coach to help students prepare for quizzes:
+- **FREE**: Uses Groq's llama-3.1-70b-versatile model
+- **Context-Aware**: Knows which course you're studying
+- **Intelligent Fallback**: Works even without API keys
+- **Real-time**: Instant responses to help you learn
 
-### File Structure
+See [CHATBOT_SETUP.md](CHATBOT_SETUP.md) for detailed setup instructions.
+
+## 🛠️ Technology Stack
+
+### Frontend
+- **React 18** with TypeScript
+- **Vite** for fast development and builds
+- **Tailwind CSS** for modern styling
+- **React Router v6** for navigation
+- **html2canvas** & **jspdf** for certificate generation
+
+### Backend
+- **Node.js** with Express.js
+- **JWT** for authentication
+- **bcryptjs** for password hashing
+- **express-validator** for input validation
+- **In-memory database** for quick development (MongoDB-ready)
+- **OpenAI SDK** for AI integrations (Groq & OpenAI)
+
+## 📂 Project Structure
+
 ```
-src/
-├── components/          # Reusable UI components
-├── pages/              # Route components
-├── hooks/              # Custom React hooks
-├── types/              # TypeScript interfaces
-├── data/               # Demo data and seed content
-├── utils/              # Utility functions
-└── App.tsx             # Main application component
+cursor.webapp/
+├── backend/                # Backend server
+│   ├── src/
+│   │   ├── server.js      # Main server file
+│   │   ├── controllers/   # Request handlers
+│   │   ├── routes/        # API routes
+│   │   ├── middleware/    # Auth & validation
+│   │   ├── db/            # In-memory database
+│   │   └── utils/         # Helper functions
+│   ├── config.env.example # Environment template
+│   └── package.json
+├── src/                   # Frontend React app
+│   ├── pages/             # Page components
+│   ├── components/        # Reusable components
+│   ├── data/              # Demo data
+│   ├── hooks/             # Custom React hooks
+│   └── services/          # API service layer
+├── CHATBOT_SETUP.md       # Chatbot setup guide
+├── start-app.bat          # Windows startup script
+└── package.json
 ```
 
-### Key Features
-- **Type Safety**: Full TypeScript coverage
-- **Component Library**: Reusable, accessible components
-- **State Management**: Context-based authentication and data
-- **Routing**: Protected routes with role-based access
-- **Persistence**: LocalStorage for demo data (backend-ready)
+## 🔒 Security Features
 
-## 🚀 Deployment
+- JWT-based authentication
+- Password hashing with bcryptjs
+- Role-based access control (Student/Admin)
+- Input validation and sanitization
+- CORS configuration
+- Secure API endpoints
+- Environment variable protection
 
-### Build for Production
+## 📝 API Documentation
+
+### Authentication
+- `POST /api/auth/register` - Register new user
+- `POST /api/auth/login` - Login user
+- `GET /api/auth/me` - Get current user
+
+### Courses
+- `GET /api/courses` - Get all courses
+- `GET /api/courses/:id` - Get course by ID
+- `POST /api/courses` - Create course (Admin)
+- `PUT /api/courses/:id` - Update course (Admin)
+- `DELETE /api/courses/:id` - Delete course (Admin)
+
+### Progress
+- `GET /api/progress/:userId/:courseId` - Get user progress
+- `POST /api/progress/lesson` - Update lesson progress
+- `POST /api/progress/quiz` - Submit quiz results
+
+### Chatbot
+- `POST /api/chatbot/chat` - Chat with AI assistant
+
+## 🎨 UI/UX Highlights
+
+- **Gradient Headers**: Eye-catching course section headers
+- **Progress Milestones**: Visual feedback at 25%, 50%, 75%, 100%
+- **Celebration Animations**: Confetti and success messages on completion
+- **Interactive Quizzes**: Hover effects and instant visual feedback
+- **XP System**: Gamified learning experience
+- **Responsive Design**: Works on desktop, tablet, and mobile
+
+## 🚢 Deployment
+
+### Frontend (Vercel/Netlify)
 ```bash
 npm run build
+# Deploy the 'dist' folder
 ```
 
-### Deploy to Vercel/Netlify
-1. Connect your repository
-2. Set build command: `npm run build`
-3. Set output directory: `dist`
-4. Deploy!
+### Backend (Heroku/Railway)
+```bash
+cd backend
+# Follow your platform's deployment guide
+```
 
-## 🔮 Future Enhancements
-
-### Backend Integration
-- Replace LocalStorage with real API calls
-- Implement user management and authentication
-- Add file upload for course media
-- Real-time progress synchronization
-
-### Advanced Features
-- **Video Lessons** - Support for video content
-- **Discussion Forums** - Student and instructor interaction
-- **Advanced Analytics** - Detailed learning insights
-- **Mobile App** - React Native version
-- **Multi-language** - Internationalization support
-- **Dark Mode** - Theme switching capability
-
-### Content Expansion
-- **Additional Courses** - More compliance and security topics
-- **Interactive Labs** - Hands-on practical exercises
-- **Peer Learning** - Collaborative features
-- **Instructor Tools** - Advanced content creation
-
-## 📄 License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+### Environment Variables for Production
+Make sure to set all variables from `config.env.example` in your hosting platform.
 
 ## 🤝 Contributing
 
 1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Create a Pull Request
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 📞 Support
+## 📄 License
 
-For support and questions, please open an issue in the repository or contact the development team.
+This project is open source and available under the [MIT License](LICENSE).
+
+## 🙏 Acknowledgments
+
+- Course content based on ICO (Information Commissioner's Office) guidelines
+- Cybersecurity best practices from leading authorities
+- AI powered by Groq (FREE) and OpenAI APIs
+- Built with modern web technologies
+
+## 📧 Contact
+
+**Paul** - [@PaulLDN](https://github.com/PaulLDN)
+
+**Project Link**: [https://github.com/PaulLDN/cursor.webapp](https://github.com/PaulLDN/cursor.webapp)
 
 ---
 
-**Built with ❤️ for professional development and compliance training**
+⭐ **Star this repo if you find it useful!** ⭐

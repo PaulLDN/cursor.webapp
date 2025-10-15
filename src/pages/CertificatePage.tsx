@@ -3,11 +3,16 @@ import { useAuth } from '@/hooks/useAuthContext';
 import { demoCourses } from '@/data/demoData';
 import Button from '@/components/Button';
 import { Download, ArrowLeft, Award } from 'lucide-react';
+import { useRef, useState } from 'react';
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
 
 const CertificatePage = () => {
   const { courseId } = useParams<{ courseId: string }>();
   const { user } = useAuth();
   const course = demoCourses.find(c => c.id === courseId);
+  const certificateRef = useRef<HTMLDivElement>(null);
+  const [isDownloading, setIsDownloading] = useState(false);
 
   if (!course || !user) {
     return (
@@ -22,14 +27,82 @@ const CertificatePage = () => {
     );
   }
 
-  const handleDownloadPDF = () => {
-    // In a real implementation, this would generate and download a PDF
-    alert('PDF download functionality would be implemented here');
+  const handleDownloadPDF = async () => {
+    if (!certificateRef.current) return;
+    
+    setIsDownloading(true);
+    
+    try {
+      // Generate canvas from the certificate div
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 2,
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      // Calculate PDF dimensions (A4 landscape)
+      const imgWidth = 297; // A4 landscape width in mm
+      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      
+      // Create PDF
+      const pdf = new jsPDF({
+        orientation: imgHeight > imgWidth ? 'portrait' : 'landscape',
+        unit: 'mm',
+        format: 'a4',
+      });
+
+      const imgData = canvas.toDataURL('image/png');
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      
+      // Download PDF
+      const fileName = `${course.title.replace(/\s+/g, '_')}_Certificate_${user.name.replace(/\s+/g, '_')}.pdf`;
+      pdf.save(fileName);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      alert('Failed to generate PDF. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
-  const handleDownloadPNG = () => {
-    // In a real implementation, this would generate and download a PNG
-    alert('PNG download functionality would be implemented here');
+  const handleDownloadPNG = async () => {
+    if (!certificateRef.current) return;
+    
+    setIsDownloading(true);
+    
+    try {
+      // Generate canvas from the certificate div
+      const canvas = await html2canvas(certificateRef.current, {
+        scale: 3, // Higher scale for better quality
+        backgroundColor: '#ffffff',
+        logging: false,
+      });
+
+      // Convert canvas to blob
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          alert('Failed to generate PNG. Please try again.');
+          return;
+        }
+
+        // Create download link
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        const fileName = `${course.title.replace(/\s+/g, '_')}_Certificate_${user.name.replace(/\s+/g, '_')}.png`;
+        
+        link.href = url;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+      }, 'image/png');
+    } catch (error) {
+      console.error('Error generating PNG:', error);
+      alert('Failed to generate PNG. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
   };
 
   return (
@@ -53,7 +126,7 @@ const CertificatePage = () => {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Certificate */}
-        <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div ref={certificateRef} className="bg-white rounded-lg shadow-lg overflow-hidden">
           {/* Certificate Header */}
           <div className="bg-gradient-corporate text-white p-8 text-center">
             <Award className="h-16 w-16 mx-auto mb-4" />
@@ -113,11 +186,21 @@ const CertificatePage = () => {
 
         {/* Download Options */}
         <div className="mt-8 flex justify-center space-x-4">
-          <Button onClick={handleDownloadPDF} variant="outline">
+          <Button 
+            onClick={handleDownloadPDF} 
+            variant="outline"
+            disabled={isDownloading}
+            isLoading={isDownloading}
+          >
             <Download className="h-4 w-4 mr-2" />
             Download PDF
           </Button>
-          <Button onClick={handleDownloadPNG} variant="outline">
+          <Button 
+            onClick={handleDownloadPNG} 
+            variant="outline"
+            disabled={isDownloading}
+            isLoading={isDownloading}
+          >
             <Download className="h-4 w-4 mr-2" />
             Download PNG
           </Button>

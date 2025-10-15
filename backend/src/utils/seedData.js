@@ -27,7 +27,7 @@ const seedData = async () => {
     });
 
     const studentUser = await User.create({
-      name: 'John Student',
+      name: 'Arden Student',
       email: 'student@example.com',
       password: 'password',
       role: 'student'

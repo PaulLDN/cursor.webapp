@@ -21,7 +21,7 @@ router.get('/certificates', protect, getUserCertificates);
 router.get('/:courseId', protect, getCourseProgress);
 
 // @route   PUT /api/progress/:courseId/lesson
-router.put('/:courseId/lesson', protect, [
+router.put('/:courseId/lesson', [
   body('slideIndex')
     .isInt({ min: 0 })
     .withMessage('Slide index must be a non-negative integer'),

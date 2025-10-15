@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -23,8 +23,16 @@ const LoginPage = () => {
     try {
       const success = await login(email, password);
       if (success) {
-        // Redirect based on user role will be handled by the auth context
-        navigate('/dashboard');
+        // Check localStorage for immediate user data since context might not have updated yet
+        const savedUser = localStorage.getItem('user');
+        const userData = savedUser ? JSON.parse(savedUser) : user;
+        
+        // Redirect based on user role
+        if (userData?.role === 'admin') {
+          navigate('/admin');
+        } else {
+          navigate('/dashboard');
+        }
       } else {
         setError('Invalid email or password. Please try again.');
       }

@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     } catch (error) {
       // Fallback to demo users if API is not available
       const demoUsers = [
-        { id: '1', email: 'student@example.com', password: 'password', name: 'John Student', role: 'student' },
+        { id: '1', email: 'student@example.com', password: 'password', name: 'Arden Student', role: 'student' },
         { id: '2', email: 'admin@example.com', password: 'password', name: 'Admin User', role: 'admin' }
       ];
       
