@@ -1,19 +1,34 @@
 import { useAuth } from '@/hooks/useAuthContext';
 import Button from '@/components/Button';
-import { BookOpen, Award, Clock, TrendingUp, LogOut } from 'lucide-react';
+import { BookOpen, Award, Clock, TrendingUp, LogOut, LucideIcon } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
+interface Stat {
+  label: string;
+  value: string;
+  icon: LucideIcon;
+  color: string;
+}
+
+interface RecentCourse {
+  id: string;
+  title: string;
+  progress: number;
+  lastAccessed: string;
+  nextLesson: string;
+}
 
 const StudentDashboard = () => {
   const { user, logout } = useAuth();
 
-  const stats = [
+  const stats: Stat[] = [
     { label: 'Courses Enrolled', value: '2', icon: BookOpen, color: 'text-corporate-secondary' },
     { label: 'Certificates Earned', value: '1', icon: Award, color: 'text-green-600' },
     { label: 'Hours Completed', value: '3.5', icon: Clock, color: 'text-corporate-primary' },
     { label: 'Average Score', value: '85%', icon: TrendingUp, color: 'text-orange-600' },
   ];
 
-  const recentCourses = [
+  const recentCourses: RecentCourse[] = [
     {
       id: 'gdpr-compliance',
       title: 'GDPR Training Course (SME Edition)',
@@ -63,7 +78,7 @@ const StudentDashboard = () => {
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {stats.map((stat, index) => (
+          {stats.map((stat: Stat, index: number) => (
             <div key={index} className="bg-white rounded-lg shadow p-6">
               <div className="flex items-center">
                 <div className={`p-2 rounded-lg bg-gray-50 ${stat.color}`}>
@@ -85,7 +100,7 @@ const StudentDashboard = () => {
               <h3 className="text-lg font-semibold text-gray-900">Continue Learning</h3>
             </div>
             <div className="p-6 space-y-4">
-              {recentCourses.map((course) => (
+              {recentCourses.map((course: RecentCourse) => (
                 <div key={course.id} className="border border-gray-200 rounded-lg p-4">
                   <div className="flex justify-between items-start mb-2">
                     <h4 className="font-medium text-gray-900">{course.title}</h4>
