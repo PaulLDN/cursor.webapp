@@ -1,5 +1,5 @@
 const bcrypt = require('bcryptjs');
-const User = require('../models/User');
+const db = require('../db/inMemoryDB');
 const generateToken = require('../utils/generateToken');
 const { validationResult } = require('express-validator');
 
@@ -20,7 +20,7 @@ const register = async (req, res) => {
     const { name, email, password, role } = req.body;
 
     // Check if user exists
-    const userExists = await User.findOne({ email });
+    const userExists = db.findUserByEmail(email);
     if (userExists) {
       return res.status(400).json({
         success: false,
@@ -32,7 +32,7 @@ const register = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     // Create user
-    const user = await User.create({
+    const user = db.createUser({
       name,
       email,
       password: hashedPassword,
@@ -82,7 +82,7 @@ const login = async (req, res) => {
     const { email, password } = req.body;
 
     // Check for user
-    const user = await User.findOne({ email });
+    const user = db.findUserByEmail(email);
     if (!user) {
       return res.status(401).json({
         success: false,
@@ -126,7 +126,7 @@ const login = async (req, res) => {
 // @access  Private
 const getMe = async (req, res) => {
   try {
-    const user = await User.findById(req.user.id);
+    const user = db.findUserById(req.user.id);
     
     if (!user) {
       return res.status(404).json({

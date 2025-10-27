@@ -21,7 +21,8 @@ class ApiService {
 
   private async request<T>(
     endpoint: string,
-    options: RequestInit = {}
+    options: RequestInit = {},
+    timeoutMs: number = 10000 // Default 10 seconds timeout
   ): Promise<T> {
     const url = `${this.baseURL}${endpoint}`;
     
@@ -41,9 +42,9 @@ class ApiService {
     }
 
     try {
-      // Add timeout to prevent slow requests (2 seconds)
+      // Add timeout to prevent slow requests
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 2000);
+      const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
       
       const response = await fetch(url, {
         ...config,
@@ -284,7 +285,7 @@ class ApiService {
         courseId,
         context
       }),
-    });
+    }, 30000); // 30 second timeout for AI requests
   }
 }
 

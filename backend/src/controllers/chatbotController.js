@@ -1,6 +1,12 @@
 const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const { validationResult } = require('express-validator');
 const db = require('../db/inMemoryDB');
+
+// Initialize Google Gemini AI (FREE with generous limits)
+const gemini = process.env.GEMINI_API_KEY && process.env.GEMINI_API_KEY !== 'your-gemini-api-key-here'
+  ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+  : null;
 
 // Initialize OpenAI (paid)
 const openai = process.env.OPENAI_API_KEY && process.env.OPENAI_API_KEY !== 'your-openai-api-key-here' 
@@ -320,11 +326,102 @@ Use this context to provide more relevant and personalized responses.`;
 
     let aiResponse;
 
-    // Try Groq API first (FREE - llama-3.1-70b-versatile)
-    if (groq) {
+    // Try Google Gemini API first (FREE with generous limits)
+    if (gemini) {
+      try {
+        const model = gemini.getGenerativeModel({ model: "gemini-2.0-flash" });
+        const chat = model.startChat({
+          history: [
+            {
+              role: "user",
+              parts: [{ text: systemPrompt }],
+            },
+            {
+              role: "model",
+              parts: [{ text: "Understood. I'm ready to help students with their training courses. I'll provide clear, educational, and supportive responses." }],
+            },
+          ],
+          generationConfig: {
+            maxOutputTokens: 500,
+            temperature: 0.7,
+          },
+        });
+
+        const result = await chat.sendMessage(message);
+        const response = await result.response;
+        aiResponse = response.text();
+        console.log(`✅ Google Gemini AI (FREE) - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+      } catch (geminiError) {
+        console.error('Gemini API error, trying Groq:', geminiError.message);
+        
+        // Try Groq API as second option
+        if (groq) {
+          try {
+            const completion = await groq.chat.completions.create({
+              model: "llama-3.1-70b-versatile",
+              messages: [
+                {
+                  role: "system",
+                  content: systemPrompt
+                },
+                {
+                  role: "user",
+                  content: message
+                }
+              ],
+              max_tokens: 500,
+              temperature: 0.7,
+            });
+
+            aiResponse = completion.choices[0].message.content;
+            console.log(`✅ Groq AI (FREE) - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+          } catch (groqError) {
+            console.error('Groq API error, trying OpenAI:', groqError.message);
+            
+            // Try OpenAI API as third option
+            if (openai) {
+              try {
+                const completion = await openai.chat.completions.create({
+                  model: "gpt-3.5-turbo",
+                  messages: [
+                    {
+                      role: "system",
+                      content: systemPrompt
+                    },
+                    {
+                      role: "user",
+                      content: message
+                    }
+                  ],
+                  max_tokens: 500,
+                  temperature: 0.7,
+                });
+
+                aiResponse = completion.choices[0].message.content;
+                console.log(`OpenAI Chat - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+              } catch (openaiError) {
+                console.error('OpenAI API error, falling back to intelligent responses:', openaiError.message);
+                // Fall back to intelligent responses
+                aiResponse = await generateFallbackResponse(message, courseId, context);
+                console.log(`Fallback Chat - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+              }
+            } else {
+              // Fall back to intelligent responses
+              aiResponse = await generateFallbackResponse(message, courseId, context);
+              console.log(`Fallback Chat - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+            }
+          }
+        } else {
+          // Fall back to intelligent responses if Groq not available
+          aiResponse = await generateFallbackResponse(message, courseId, context);
+          console.log(`Fallback Chat - User: ${user.email}, Course: ${courseId || 'General'}, Message: ${message.substring(0, 100)}...`);
+        }
+      }
+    } else if (groq) {
+      // Try Groq if Gemini not available
       try {
         const completion = await groq.chat.completions.create({
-          model: "llama-3.1-70b-versatile", // FREE model
+          model: "llama-3.1-70b-versatile",
           messages: [
             {
               role: "system",

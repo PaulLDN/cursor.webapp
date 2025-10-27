@@ -1,10 +1,15 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const mongoose = require('mongoose');
 const errorHandler = require('./middleware/errorHandler');
 
 // Load env vars
 dotenv.config({ path: './config.env' });
+
+// Disable Mongoose buffering (since we're using in-memory DB for now)
+mongoose.set('bufferCommands', false);
+mongoose.set('bufferTimeoutMS', 0);
 
 // Initialize in-memory database
 const db = require('./db/inMemoryDB');
