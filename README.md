@@ -212,13 +212,13 @@ cursor.webapp/
 
 ## 🚢 Deployment
 
-### Frontend (Vercel/Netlify)
+### Frontend (Render.com)
 ```bash
 npm run build
 # Deploy the 'dist' folder
 ```
 
-### Backend (Heroku/Railway)
+### Backend (Render.com)
 ```bash
 cd backend
 # Follow your platform's deployment guide
@@ -250,8 +250,5 @@ This project is open source and available under the [MIT License](LICENSE).
 
 **Paul** - [@PaulLDN](https://github.com/PaulLDN)
 
-**Project Link**: [https://github.com/PaulLDN/cursor.webapp](https://github.com/PaulLDN/cursor.webapp)
 
----
-
-⭐ **Star this repo if you find it useful!** ⭐
+⭐⭐⭐
