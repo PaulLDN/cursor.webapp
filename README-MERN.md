@@ -381,6 +381,4 @@ For support and questions:
 - Contact the development team
 - Check the documentation
 
----
 
-**Built with ❤️ using the MERN stack**
