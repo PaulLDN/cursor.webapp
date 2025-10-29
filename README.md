@@ -51,14 +51,12 @@ A modern, full-featured corporate training platform built with the MERN stack (M
    cp backend/config.env.example backend/config.env
    ```
 
-4. **Get a FREE Groq API Key (Optional but Recommended)**
-   - Visit [https://console.groq.com/](https://console.groq.com/)
-   - Sign up for a free account
+4. **Get a FREE Gemini API Key **
+   - Visit (https://aistudio.google.com/app/api-keys)
+   - Sign up for a free student account
    - Generate an API key
    - Add it to `backend/config.env`:
-     ```
-     GROQ_API_KEY=your-actual-groq-api-key-here
-     ```
+    
 
 5. **Run the application**
    
